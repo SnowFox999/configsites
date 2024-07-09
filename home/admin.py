@@ -17,5 +17,4 @@ admin.site.register(Monitor)
 admin.site.register(UserName)
 admin.site.register(AdditionalSettings)
 
-
 # Register your models here.

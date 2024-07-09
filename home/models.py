@@ -171,4 +171,5 @@ class Order_Computer(models.Model):
         return f"Order {self.id} - {self.customer.name} ({self.computer.name} - {self.computer.status})"
     
 
+
 # Create your models here.

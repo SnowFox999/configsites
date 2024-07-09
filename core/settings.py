@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
 
+
     "home",
 ]
 
@@ -74,6 +75,7 @@ ROOT_URLCONF = "core.urls"
 HOME_TEMPLATES = os.path.join(BASE_DIR, 'templates')
 
 
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -81,6 +83,7 @@ TEMPLATES = [
             HOME_TEMPLATES,
             
         ],
+
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

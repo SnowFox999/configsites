@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from rest_framework.response import Response
@@ -75,6 +76,7 @@ def order_list(request):
     return render(request, 'home/order_list.html', {'orders': orders})
 
    
+
 
 
 
