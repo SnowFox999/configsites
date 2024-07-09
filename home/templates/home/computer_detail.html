@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Computer Detail</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1 id="computer-name"></h1>
+    <p>Date: <span id="computer-date"></span></p>
+    <p>Status: <span id="computer-status"></span></p>
+    
+    <button id="edit-computer">Edit</button>
+
+    <script>
+        $(document).ready(function() {
+            var computerId = '{{ computer.id }}';
+            
+            // Загрузка данных компьютера при загрузке страницы
+            $.ajax({
+                url: '/computer/' + computerId + '/',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    $('#computer-name').text(data.name);
+                    $('#computer-date').text(data.date);
+                    $('#computer-status').text(data.status);
+                },
+                error: function(xhr, status, error) {
+                    alert('Error fetching computer details');
+                    console.error(error);
+                }
+            });
+            
+            // Редактирование компьютера
+            $('#edit-computer').click(function() {
+                $.ajax({
+                    url: '/computer/' + computerId + '/edit/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        'description': 'New description',  // Ваши данные для изменения
+                        'date': '2024-07-05',              // Ваши данные для изменения
+                        'status': 'Ready'                  // Ваши данные для изменения
+                    }),
+                    dataType: 'json',
+                    success: function(data) {
+                        alert('Computer details updated successfully!');
+                        // Обновление интерфейса, если нужно
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error updating computer details.');
+                        console.error(error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
