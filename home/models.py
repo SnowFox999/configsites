@@ -31,7 +31,7 @@ class Computer(models.Model):
         ('Computer4', 'Fujitsu ESPRIMO P557'),
     ]
     
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='computers') #connect to customer
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='computers') #connect to customer
     name = models.CharField(max_length=20) # name of computer
     serial_number = models.CharField(max_length=30, unique=True) #serial numer
     type = models.CharField(max_length=30, choices=TYPE_CHOICES, blank=True, null=True)
@@ -163,12 +163,11 @@ class AdditionalSettings(models.Model):
 
 class Order_Computer(models.Model):
     
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     computer = models.ForeignKey(Computer, on_delete=models.CASCADE)
     text = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
-        return f"Order {self.id} - {self.customer.name} ({self.computer.name} - {self.computer.status})"
+        return f"Order {self.id} - {self.computer.customer.name} ({self.computer.name} - {self.computer.status})"
     
 
 
