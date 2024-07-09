@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework.response import Response
 from django.contrib.auth.decorators import login_required
 from .models import Computer, Order_Computer
-import json
+from django.db.models import Q
 
 
 # Create your views here.
@@ -72,8 +72,22 @@ def computer_edit(request, computer_id):
 
 
 def order_list(request):
-    orders = Order_Computer.objects.all()  # Получаем все заказы из базы данных
+    orders = Order_Computer.objects.all()
     return render(request, 'home/order_list.html', {'orders': orders})
+
+def search_orders(request):
+    query = request.GET.get('q', '')
+    orders = Order_Computer.objects.all()
+
+    if query:
+        orders = orders.filter(
+            Q(computer__name__icontains=query) |
+            Q(computer__customer__name__icontains=query) |
+            Q(computer__date__icontains=query) |  # Здесь нужно указать поле даты в модели Computer
+            Q(computer__status__icontains=query) |  # Здесь нужно указать поле статуса в модели Computer
+            Q(id__icontains=query)  # Поиск по айди заказа
+        )
+    return render(request, 'home/order_list_results.html', {'orders': orders})
 
    
 

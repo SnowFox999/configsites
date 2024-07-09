@@ -1,0 +1,32 @@
+
+  
+  <table class="table table-hover text-nowrap">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Computer</th>
+        <th>User</th>
+        <th>Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td>{{ order.id }}</td>
+        <td>{{ order.computer.name }}</td>
+        <td>{{ order.computer.customer.name }}</td>
+        <td>{{ order.computer.date }}</td>
+        <td>
+          <span class="tag {% if order.computer.status == 'Confirm' %}tag-success{% elif order.computer.status == 'Ready' %}tag-warning{% elif order.computer.status == 'Progress' %}tag-danger{% else %}tag-primary{% endif %}">
+            {{ order.computer.status }}
+          </span>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">No orders found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
