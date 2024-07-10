@@ -145,9 +145,9 @@ class UserName(models.Model):
     ('User', 'User'),
 ]
 
-    user_type = models.CharField(max_length=5, choices=USER_TYPES)
-    login = models.CharField(max_length=20, unique=False)
-    password = models.CharField(max_length=20)
+    user_type = models.CharField(max_length=5, choices=USER_TYPES, default='Admin')
+    login = models.CharField(max_length=20, unique=False, default='Administrator')
+    password = models.CharField(max_length=20, unique=False, default='icom')
 
     def __str__(self):
         return f'{self.get_user_type_display()} - {self.login} - {self.password}'

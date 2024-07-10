@@ -22,23 +22,28 @@ def computer_detail(request, computer_id):
         'date': computer.date.strftime('%Y-%m-%d'),
         'serial_number': computer.serial_number,
         'type': computer.type,
-        'custom>type': computer.custom_type,
-        'processor': computer.processor,
-        'ram': computer.ram,
-        'hardDisk': computer.hardDisk,
-        'diskPlace': computer.diskPlace,
-        'videoCard': computer.videoCard,
-        'typeDB': computer.typeDB,
-        'lanCard': computer.lanCard,
-        'monitor': computer.monitor,
-        'admin': computer.admin,
-        'user': computer.user,
+        'custom_type': computer.custom_type,
+        'processor': list(computer.processor.values('id', 'name')),
+        'ram': list(computer.ram.values('id', 'name')),
+        'hardDisk': list(computer.hardDisk.values('id', 'name')),
+        'diskPlace': list(computer.diskPlace.values('id', 'name')),
+        'videoCard': list(computer.videoCard.values('id', 'name')),
+        'typeDB': list(computer.typeDB.values('id', 'name')),
+        'lanCard': list(computer.lanCard.values('id', 'name')),
+        'monitor': list(computer.monitor.values('id', 'name')),
+        'admin': list(computer.admin.values('id', 'login')),
+        'user': list(computer.user.values('id', 'login')),
         'addSoftware': computer.addSoftware,
         'addDevices': computer.addDevices,
         'addComment': computer.addComment,
-        'addSettings': computer.addSettings,
+        'addSettings': list(computer.addSettings.values('id', 'name')),
     }
     return JsonResponse(data)
+
+
+def computer_detail_view(request):
+    return render(request, 'computer_detail.html')
+
 
 def computer_edit(request, computer_id):
     computer = get_object_or_404(Computer, pk=computer_id)

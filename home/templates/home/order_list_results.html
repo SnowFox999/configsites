@@ -13,10 +13,10 @@
     <tbody>
       {% for order in orders %}
       <tr>
-        <td>{{ order.id }}</td>
-        <td>{{ order.computer.name }}</td>
-        <td>{{ order.computer.customer.name }}</td>
-        <td>{{ order.computer.date }}</td>
+        <td><a href="{% url 'computer_detail' order.computer.id %}">{{ order.id }}</a></td>
+        <td><a href="{% url 'computer_detail' order.computer.id %}">{{ order.computer.name }}</td>
+        <td><a href="{% url 'computer_detail' order.computer.id %}">{{ order.computer.customer.name }}</td>
+        <td><a href="{% url 'computer_detail' order.computer.id %}">{{ order.computer.date }}</td>
         <td>
           <span class="tag {% if order.computer.status == 'Confirm' %}tag-success{% elif order.computer.status == 'Ready' %}tag-warning{% elif order.computer.status == 'Progress' %}tag-danger{% else %}tag-primary{% endif %}">
             {{ order.computer.status }}

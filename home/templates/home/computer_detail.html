@@ -1,59 +1,378 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Computer Detail</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <h1 id="computer-name"></h1>
-    <p>Date: <span id="computer-date"></span></p>
-    <p>Status: <span id="computer-status"></span></p>
-    
-    <button id="edit-computer">Edit</button>
+{% extends 'layouts/base.html' %}
+{% load static %}
 
-    <script>
-        $(document).ready(function() {
-            var computerId = '{{ computer.id }}';
+{% block title %} Computer detail {% endblock title %}
+{% block bodyclass %} hold-transition sidebar-mini {% endblock bodyclass %}
+{% block content %}
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Computer detail</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Computer detail</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+      <!-- Default box -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Title</h3>
+
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card card-warning">
+          <div class="card-header">
+            <h3 class="card-title">General Elements</h3>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            <form>
+              <div class="row">
+                <div class="col-sm-6">
+                  <!-- text input -->
+                  <div class="form-group">
+                    <label>Customer</label>
+                    <select class="form-control select2bs4" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
+                      <option>Delaware</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label>Placement</label>
+                    <select class="form-control select2bs4" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
+                      <option>Delaware</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-6">
+                  <!-- textarea -->
+                  <div class="form-group">
+                    <label>Customer name</label>
+                    <input type="text" class="form-control" placeholder="Enter ...">
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label>Placement</label>
+                    <input type="text" class="form-control" placeholder="Enter ...">
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label>Computer type</label>
+                    <select class="form-control select2bs4" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
+                    </select>
+                </div>
+              </div>
+
+<!-- MAIN INFORMATION BLOCK-->
+    
+              <h4>Main Information</h4>
+              <div class="row">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>Computer name</label>
+                      <input type="text" class="form-control" placeholder="Name">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>Computer series number</label>
+                      <input type="text" class="form-control" placeholder="Series number">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>User type</label>
+                      <select class="form-control select2bs4" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>User name</label>
+                      <input type="text" class="form-control" placeholder="Name">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>User password</label>
+                      <input type="text" class="form-control" placeholder="Name">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="form-group">
+                    <button type="add" class="btn btn-primary">+ Add user</button>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="form-group">
+                  <label>Comment</label>
+                  <textarea class="form-control" rows="3" placeholder="Add a comment"></textarea>
+                </div> 
+              </div>
+
+<!-- COMPUTER HARDWARE BLOCK-->
+
+              <h4>Computer hardware</h4>
+              <div class="row">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>Processor</label>
+                      <select class="form-control select2bs4" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>Video card</label>
+                      <select class="form-control select2bs4" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>LAN card</label>
+                      <select class="form-control select2bs4" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>LAN card series</label>
+                      <input type="text" class="form-control" placeholder="LAN card series">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="row">
+                  <div class="form-group">
+                    <label>RAM GB</label>
+                    <textarea class="form-control" rows="3" placeholder="GB"></textarea>
+                  </div> 
+                
+                  <div class="form-group">
+                    <label>RAM type</label>
+                    <textarea class="form-control" rows="3" placeholder="DDR4"></textarea>
+                  </div> 
+                </div>
+                <div class="row">
+                  <div class="form-group">
+                    <label>Hard disk GB</label>
+                    <textarea class="form-control" rows="3" placeholder="GB"></textarea>
+                  </div> 
+                
+                  <div class="form-group">
+                    <label>Hard disk type</label>
+                    <textarea class="form-control" rows="3" placeholder="SSD"></textarea>
+                  </div> 
+                </div>
+              </div>
+
             
-            // Загрузка данных компьютера при загрузке страницы
-            $.ajax({
-                url: '/computer/' + computerId + '/',
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    $('#computer-name').text(data.name);
-                    $('#computer-date').text(data.date);
-                    $('#computer-status').text(data.status);
-                },
-                error: function(xhr, status, error) {
-                    alert('Error fetching computer details');
-                    console.error(error);
-                }
-            });
-            
-            // Редактирование компьютера
-            $('#edit-computer').click(function() {
-                $.ajax({
-                    url: '/computer/' + computerId + '/edit/',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        'description': 'New description',  // Ваши данные для изменения
-                        'date': '2024-07-05',              // Ваши данные для изменения
-                        'status': 'Ready'                  // Ваши данные для изменения
-                    }),
-                    dataType: 'json',
-                    success: function(data) {
-                        alert('Computer details updated successfully!');
-                        // Обновление интерфейса, если нужно
-                    },
-                    error: function(xhr, status, error) {
-                        alert('Error updating computer details.');
-                        console.error(error);
-                    }
-                });
-            });
-        });
-    </script>
-</body>
-</html>
+
+<!-- COMPUTER SOFTWARE BLOCK-->              
+
+              <h4>Computer software</h4>
+              <div class="row">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>Windows version</label>
+                      <select class="form-control select2bs4" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>License number</label>
+                      <input type="text" class="form-control" placeholder="License number">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>License keys</label>
+                      <input type="text" class="form-control" placeholder="License keys">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>Database type</label>
+                      <select class="form-control select2bs4" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>Database version</label>
+                      <select class="form-control select2bs4" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="form-group">
+                  <label>Additional software</label>
+                  <textarea class="form-control" rows="3" placeholder="Add a software"></textarea>
+                </div> 
+              </div>
+
+
+<!-- ADDITIONAL DEVICES BLOCK-->              
+
+              <h4>Additional devices</h4>
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label>Monitor</label>
+                    <select class="form-control select2bs4" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label>DVD / CD</label>
+                    <select class="form-control select2bs4" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label>Additional devices</label>
+                    <textarea class="form-control" rows="3" placeholder="Add a software"></textarea>
+                  </div>
+                </div>
+              </div>
+                
+                
+ <!-- ADDITIONAL SETTINGS BLOCK-->              
+              
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" class="form-control" placeholder="Name">
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label>Additional settings</label>
+                    <textarea class="form-control" rows="3" placeholder="Add a settings"></textarea>
+                  </div>
+                </div>
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <button type="add" class="btn btn-primary">+ Add settings</button>
+                  </div>
+                </div>
+              </div>
+
+ <!-- DATE, EMPLOYEE BLOCK--> 
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label>Date</label>
+
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                    </div>
+                    <input type="text" class="form-control" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask>
+                  </div>
+                  <!-- /.input group -->
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label>Employee</label>
+                  <select class="form-control select2bs4" style="width: 100%;">
+                    <option selected="selected">Alabama</option>
+                    <option>Alaska</option>
+                    <option>California</option>
+                  </select>
+                </div>
+              </div>
+              
+              
+            </form>
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+        <!-- /.card-body -->
+        <div class="card-footer">
+          Footer
+        </div>
+        <!-- /.card-footer-->
+      </div>
+      <!-- /.card -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+{% endblock content %}
