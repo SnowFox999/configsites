@@ -49,20 +49,21 @@ class Computer(models.Model):
     processor = models.ManyToManyField('Processor') #many processors to many computers
     ram = models.ManyToManyField('RAM') # many to many RAM
     hardDisk = models.ManyToManyField('HardDisk') # many to many HardDisk
-    diskPlace = models.ManyToManyField('DiskPlace', null=True, blank=True) # many to many CD/DVD
+    diskPlace = models.ManyToManyField('DiskPlace', blank=True) # many to many CD/DVD
     videoCard = models.ManyToManyField('VideoCard') # many to many graphics card
     typeDB = models.ManyToManyField('TypeDB') #type of data base
     lanCard = models.ManyToManyField('LANcard') # netzwerkkarte
-    monitor = models.ManyToManyField('Monitor', null=True, blank=True) #Monitor
+    monitor = models.ManyToManyField('Monitor', blank=True) #Monitor
     admin = models.ManyToManyField('UserName', related_name='admin_computers', limit_choices_to={'user_type': 'Admin'})
-    user = models.ManyToManyField('UserName', related_name='user_computers', limit_choices_to={'user_type': 'User'}, blank=True, null=True)
+    user = models.ManyToManyField('UserName', related_name='user_computers', limit_choices_to={'user_type': 'User'}, blank=True)
     date = models.DateField(default=date.today)
     employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, related_name='computer', null=True)
     addSoftware = models.TextField(null=True, blank=True)
     addDevices = models.TextField(null=True, blank=True)
     addComment = models.TextField(null=True, blank=True)
-    addSettings = models.ManyToManyField('AdditionalSettings', null=True, blank=True)
+    addSettings = models.ManyToManyField('AdditionalSettings', blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    location = models.ManyToManyField('Location', related_name='location_computers')
 
 
     def __str__(self):
@@ -118,11 +119,11 @@ class LANcard(models.Model):
         return self.type
 
 class Location(models.Model):
-    computer = models.OneToOneField(Computer, on_delete=models.CASCADE) #location Buro, Anlage..
-    place = models.CharField(max_length=30)
+    computer = models.ForeignKey(Computer, on_delete=models.CASCADE, related_name='locations') #location Buro, Anlage..
+    name = models.CharField(max_length=30)
 
     def __str__(self):
-        return f'{self.place} - {self.computer.name}'
+        return f'{self.name} - {self.computer.name}'
     
 class Monitor(models.Model):
     MONITOR_CHOICES = [

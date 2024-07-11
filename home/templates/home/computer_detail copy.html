@@ -4,12 +4,6 @@
 {% block title %} Computer detail {% endblock title %}
 {% block bodyclass %} hold-transition sidebar-mini {% endblock bodyclass %}
 {% block content %}
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
-
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -37,57 +31,57 @@
         <div class="card-header">
           <h3 class="card-title">Title</h3>
 
-          
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         </div>
-        
-          <!-- /.card-header -->
-          <div class="card-body">
-            <form method="POST" action="{% url 'computer_detail' computer.id %}" id="computer-form">
-              {% csrf_token %}
+        <div class="card body">
+          <form id="computer-detail-form">
               <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                   <!-- text input -->
                   <div class="form-group">
-                    <label for="select_customer">Customer</label>
-                    <select id="select_customer" name = "select_customer" class="form-control select2bs4" style="width: 100%;">
-                      {% for customer in customers %}
-                      <option value="{{ customer.id }}" {% if computer.customer and computer.customer.id == customer.id %} selected {% endif %}>
-                        {{ customer.name }}
-                      </option>
-                    {% endfor %}
-                  </select>
+                    <label>Customer name</label>
+                    <select class="form-control select2bs4" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
+                      <option>Delaware</option>
+                    </select>
                   </div>
                 </div>
-                      
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                   <div class="form-group">
-                    <label for="select_locationr">Placement</label>
-                    <select id="select_location" name = "select_location" class="form-control select2bs4" style="width: 100%;">
-                      {% for location in locations %}
-                      <option value="{{ location.id }}" {% if computer.location and computer.location.id == location.id %} selected {% endif %}>
-                        {{ location.name }}
-                      </option>
-                    {% endfor %}
-                  </select>
+                    <label>Placement</label>
+                    <select class="form-control select2bs4" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
+                      <option>Delaware</option>
+                    </select>
                   </div>
                 </div>
               </div>
-
               <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                   <!-- textarea -->
                   <div class="form-group">
                     <label>Customer name</label>
                     <input type="text" class="form-control" placeholder="Enter ...">
                   </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                   <div class="form-group">
                     <label>Placement</label>
                     <input type="text" class="form-control" placeholder="Enter ...">
                   </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                   <div class="form-group">
                     <label>Computer type</label>
                     <select class="form-control select2bs4" style="width: 100%;">
@@ -95,72 +89,62 @@
                       <option>Alaska</option>
                       <option>California</option>
                     </select>
-                  </div>
                 </div>
               </div>
 
 <!-- MAIN INFORMATION BLOCK-->
     
-              <div class="col-12">
-                <h4>Main Information</h4>
-              </div>
-              
+              <h4>Main Information</h4>
               <div class="row">
-                <div class="col-sm-4">
-                  <div class="form-group">
-                    <label>Computer name</label>
-                    <input type="text" class="form-control" placeholder="Name">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>Computer name</label>
+                      <input type="text" class="form-control" placeholder="Name">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>Computer series number</label>
+                      <input type="text" class="form-control" placeholder="Series number">
+                    </div>
                   </div>
                 </div>
-                <div class="col-sm-4">
-                  <div class="form-group">
-                    <label>Computer series number</label>
-                    <input type="text" class="form-control" placeholder="Series number">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>User type</label>
+                      <select class="form-control select2bs4" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>User name</label>
+                      <input type="text" class="form-control" placeholder="Name">
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>User password</label>
+                      <input type="text" class="form-control" placeholder="Name">
+                    </div>
                   </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="row">
                   <div class="form-group">
-                    <label>Comment</label>
-                    <textarea class="form-control" rows="3" placeholder="Add a comment"></textarea>
+                    <button type="add" class="btn btn-primary">+ Add user</button>
                   </div>
                 </div>
               </div>
-              
-
-
               <div class="row">
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>User type</label>
-                    <select class="form-control select2bs4" style="width: 100%;">
-                      <option selected="selected">Alabama</option>
-                      <option>Alaska</option>
-                      <option>California</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>User name</label>
-                    <input type="text" class="form-control" placeholder="Name">
-                  </div>
-                </div>
-                <div class="col-sm-4">
-                  <div class="form-group">
-                    <label>User password</label>
-                    <input type="text" class="form-control" placeholder="Name">
-                  </div>
-                </div>
-                
-              </div>
-              <div class="col-sm-4 ">
                 <div class="form-group">
-                  <button type="add" class="btn btn-primary">+ Add user</button>
-                </div>
+                  <label>Comment</label>
+                  <textarea class="form-control" rows="3" placeholder="Add a comment"></textarea>
+                </div> 
               </div>
-            
-              
-              
 
 <!-- COMPUTER HARDWARE BLOCK-->
 
@@ -371,57 +355,6 @@
               
               
             </form>
-
-
-            
-
-            <script>
-              $(document).ready(function() {
-                $('#select_customer').select2({
-                  tags: true,
-                  createTag: function(params) {
-                    var term = $.trim(params.term);
-
-                    if (term === '') {
-                      return null;
-                    }
-
-                    return {
-                      id: 'new:' + term,
-                      text: term,
-                      newTag: true // add additional parameters
-                    };
-                  }
-                });
-
-                $('#computer-form').on('submit', function(event) {
-                  event.preventDefault();
-                  var formData = $(this).serializeArray();
-                  var data = {};
-                  formData.forEach(function(item) {
-                    data[item.name] = item.value;
-                  });
-                  $.ajax({
-                    url: $(this).attr('action'),
-                    type: 'POST',
-                    data: JSON.stringify(data),
-                    contentType: 'application/json',
-                    headers: {
-                      'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    success: function(response) {
-                      alert(response.message);
-                    },
-                    error: function(response) {
-                      alert('An error occurred');
-                    }
-                  });
-                });
-              });
-            </script>
-
-
-
           </div>
           <!-- /.card-body -->
         </div>

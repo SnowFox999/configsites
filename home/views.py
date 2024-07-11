@@ -1,10 +1,11 @@
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from rest_framework.response import Response
 from django.contrib.auth.decorators import login_required
-from .models import Computer, Order_Computer
+from .models import Computer, Order_Computer, Customer, Location
 from django.db.models import Q
+import json
 
 
 # Create your views here.
@@ -16,29 +17,38 @@ def index(request):
 
 def computer_detail(request, computer_id):
     computer = get_object_or_404(Computer, pk=computer_id)
-    data = {
-        'name': computer.name,
-        'status': computer.status,
-        'date': computer.date.strftime('%Y-%m-%d'),
-        'serial_number': computer.serial_number,
-        'type': computer.type,
-        'custom_type': computer.custom_type,
-        'processor': list(computer.processor.values('id', 'name')),
-        'ram': list(computer.ram.values('id', 'name')),
-        'hardDisk': list(computer.hardDisk.values('id', 'name')),
-        'diskPlace': list(computer.diskPlace.values('id', 'name')),
-        'videoCard': list(computer.videoCard.values('id', 'name')),
-        'typeDB': list(computer.typeDB.values('id', 'name')),
-        'lanCard': list(computer.lanCard.values('id', 'name')),
-        'monitor': list(computer.monitor.values('id', 'name')),
-        'admin': list(computer.admin.values('id', 'login')),
-        'user': list(computer.user.values('id', 'login')),
-        'addSoftware': computer.addSoftware,
-        'addDevices': computer.addDevices,
-        'addComment': computer.addComment,
-        'addSettings': list(computer.addSettings.values('id', 'name')),
-    }
-    return JsonResponse(data)
+    customers = Customer.objects.all()
+
+    if request.method == 'GET':
+        data = {
+  
+            'name': computer.name,
+            'status': computer.status,
+            'location': list(computer.location.values('id', 'name')),
+            'date': computer.date.strftime('%Y-%m-%d'),
+            'serial_number': computer.serial_number,
+            'type': computer.type,
+            'custom_type': computer.custom_type,
+            'processor': list(computer.processor.values('id', 'name')),
+            'ram': list(computer.ram.values('id', 'type', 'gigabytes')),
+            'hardDisk': list(computer.hardDisk.values('id', 'type', 'gigabytes')),
+            'diskPlace': list(computer.diskPlace.values('id', 'name')),
+            'videoCard': list(computer.videoCard.values('id', 'name')),
+            'typeDB': list(computer.typeDB.values('id', 'type', 'version')),
+            'lanCard': list(computer.lanCard.values('id', 'type')),
+            'monitor': list(computer.monitor.values('id', 'name', 'custom_name')),
+            'admin': list(computer.admin.values('id', 'login', 'password')),
+            'user': list(computer.user.values('id', 'login', 'password')),
+            'addSoftware': computer.addSoftware,
+            'addDevices': computer.addDevices,
+            'addComment': computer.addComment,
+            'addSettings': list(computer.addSettings.values('id', 'name', 'text')),
+            'customer': computer.customer.name if computer.customer else None,
+            'employee': computer.employee.name if computer.employee else None,
+        }
+        return render(request, 'home/computer_detail.html', {'computer': computer, 'customers': customers})
+
+
 
 
 def computer_detail_view(request):
