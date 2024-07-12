@@ -66,12 +66,12 @@
                 <div class="col-sm-4">
                   <div class="form-group">
                     <label for="select_locationr">Placement</label>
-                    <select id="select_location" name = "select_location" class="form-control select2bs4" style="width: 100%;">
+                    <select id="select_location" name="select_location" class="form-control select2bs4" style="width: 100%;">
                       {% for location in locations %}
-                      <option value="{{ location.id }}" {% if computer.location and computer.location.id == location.id %} selected {% endif %}>
-                        {{ location.name }}
-                      </option>
-                    {% endfor %}
+                          <option value="{{ location.id }}" {% if computer.location and computer.location.id == location.id %} selected {% endif %}>
+                              {{ location.name }}
+                          </option>
+                      {% endfor %}
                   </select>
                   </div>
                 </div>
@@ -82,19 +82,19 @@
                   <!-- textarea -->
                   <div class="form-group">
                     <label>Customer name</label>
-                    <input type="text" class="form-control" placeholder="Enter ...">
+                    <input type="text" class="form-control" placeholder="Enter ..." disabled>
                   </div>
                 </div>
                 <div class="col-sm-4">
                   <div class="form-group">
                     <label>Placement</label>
-                    <input type="text" class="form-control" placeholder="Enter ...">
+                    <input type="text" class="form-control" placeholder="Enter ..." disabled>
                   </div>
                 </div>
                 <div class="col-sm-4">
                   <div class="form-group">
                     <label>Computer type</label>
-                    <select class="form-control select2bs4" style="width: 100%;">
+                    <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
                       <option selected="selected">Alabama</option>
                       <option>Alaska</option>
                       <option>California</option>
@@ -115,24 +115,28 @@
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>Computer name</label>
-                      <input type="text" class="form-control" placeholder="Name">
+                      <input type="text" class="form-control" placeholder="Name" name="computer_name" value="{{ computer.name }}" disabled>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-sm-6">
                       <div class="form-group">
                         <label>User type</label>
-                        <select class="form-control select2bs4" style="width: 100%;">
-                          <option selected="selected">Alabama</option>
-                          <option>Alaska</option>
-                          <option>California</option>
+                        <select class="form-control select2bs4" style="width: 100%;" name="user_type[]" disabled="disabled">
+                          {% for user_type, user_type_display in UserName.USER_TYPES %}
+                            <option value="{{ user_type }}">{{ user_type_display }}</option>
+                          {% endfor %}
                         </select>
                       </div>
                     </div>
                     <div class="col-sm-6">
                       <div class="form-group">
                         <label>User name</label>
-                        <input type="text" class="form-control" placeholder="Name">
+                        <select class="form-control" name="user_name[]" value="{{ computer.admin.login }}" disabled="disabled">
+                          {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.login }}</option>
+                          {% endfor %}
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -143,13 +147,13 @@
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>Computer series number</label>
-                      <input type="text" class="form-control" placeholder="Series number">
+                      <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" disabled>
                     </div>
                   </div>
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>User password</label>
-                    <input type="text" class="form-control" placeholder="Name">
+                    <input type="text" class="form-control" placeholder="Name" name="user_password[]" value="{{ computer.admin.password }}" disabled>
                     </div>
                   </div>
                 </div>
@@ -158,19 +162,14 @@
                 <div class="col-sm-4">
                   <div class="form-group">
                     <label>Comment</label>
-                    <textarea class="form-control" rows="3" placeholder="Add a comment"></textarea>
+                    <textarea class="form-control" rows="3" placeholder="Add a comment" name="comment" disabled>{{ computer.addComment }}</textarea> 
                   </div>
                 </div>
               </div>
               
 
-              <div class="row">
-                <div class="col-sm-4 ">
-                  <div class="form-group">
-                    <button type="add" class="btn btn-primary">+ Add user</button>
-                  </div>
-                </div>
-              </div>
+              
+              
             
               
               
@@ -185,7 +184,7 @@
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>Processor</label>
-                      <select class="form-control select2bs4" style="width: 100%;">
+                      <select class="form-control select2bs4" disabled="disabled" disabled="disabled" style="width: 100%;">
                         <option selected="selected">Alabama</option>
                         <option>Alaska</option>
                         <option>California</option>
@@ -195,7 +194,7 @@
                   <div class="row-sm-4">                    
                     <div class="form-group">
                       <label>Video card</label>
-                      <select class="form-control select2bs4" style="width: 100%;">
+                      <select class="form-control select2bs4" disabled="disabled" disabled="disabled" style="width: 100%;">
                         <option selected="selected">Alabama</option>
                         <option>Alaska</option>
                         <option>California</option>
@@ -209,7 +208,7 @@
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>LAN card</label>
-                      <select class="form-control select2bs4" style="width: 100%;">
+                      <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
                         <option selected="selected">Alabama</option>
                         <option>Alaska</option>
                         <option>California</option>
@@ -219,7 +218,7 @@
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>LAN card series</label>
-                      <input type="text" class="form-control" placeholder="Name">
+                      <input type="text" class="form-control" placeholder="Name" disabled>
                     </div>
                   </div>
                 </div>
@@ -230,7 +229,7 @@
                     <div class="col-sm-3">
                       <div class="form-group">
                         <label>RAM GB</label>
-                        <select class="form-control select2bs4" style="width: 100%;">
+                        <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
                           <option selected="selected">Alabama</option>
                           <option>Alaska</option>
                           <option>California</option>
@@ -240,7 +239,7 @@
                     <div class="col-sm-9">
                       <div class="form-group">
                         <label>RAM type</label>
-                        <input type="text" class="form-control" placeholder="Name">
+                        <input type="text" class="form-control" placeholder="Name" disabled>
                       </div>
                     </div>
                   </div>
@@ -248,7 +247,7 @@
                     <div class="col-sm-3">
                       <div class="form-group">
                         <label>Disk GB</label>
-                        <select class="form-control select2bs4" style="width: 100%;">
+                        <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
                           <option selected="selected">Alabama</option>
                           <option>Alaska</option>
                           <option>California</option>
@@ -258,7 +257,7 @@
                     <div class="col-sm-9">
                       <div class="form-group">
                         <label>Hard disk type</label>
-                        <input type="text" class="form-control" placeholder="Name">
+                        <input type="text" class="form-control" placeholder="Name" disabled>
                       </div>
                     </div>
                   </div>
@@ -279,7 +278,7 @@
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Windows</label>
-                    <select class="form-control select2bs4" style="width: 100%;">
+                    <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
                       <option selected="selected">Alabama</option>
                       <option>Alaska</option>
                       <option>California</option>
@@ -289,13 +288,13 @@
                 <div class="row-sm-4">                    
                   <div class="form-group">
                     <label>License number</label>
-                    <input type="text" class="form-control" placeholder="Name">
+                    <input type="text" class="form-control" placeholder="Name" disabled>
                   </div>
                 </div>            
                 <div class="row-sm-4">                    
                   <div class="form-group">
                     <label>License keys</label>
-                    <input type="text" class="form-control" placeholder="Name">
+                    <input type="text" class="form-control" placeholder="Name" disabled>
                   </div>
                 </div>         
               </div>
@@ -305,7 +304,7 @@
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Database type</label>
-                    <select class="form-control select2bs4" style="width: 100%;">
+                    <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
                       <option selected="selected">Alabama</option>
                       <option>Alaska</option>
                       <option>California</option>
@@ -315,7 +314,7 @@
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Database version</label>
-                    <input type="text" class="form-control" placeholder="Name">
+                    <input type="text" class="form-control" placeholder="Name" disabled>
                   </div>
                 </div>
               </div>
@@ -324,7 +323,7 @@
               <div class="col-sm-4">
                 <div class="form-group">
                   <label>Additional software</label>
-                  <textarea class="form-control" rows="3" placeholder="Add a comment"></textarea>
+                  <textarea class="form-control" rows="3" placeholder="Add a comment" disabled></textarea>
                 </div>
               </div>                
             </div>
@@ -345,7 +344,7 @@
                 
                   <div class="form-group">
                     <label>Monitor</label>
-                    <select class="form-control select2bs4" style="width: 100%;">
+                    <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
                       <option selected="selected">Alabama</option>
                       <option>Alaska</option>
                       <option>California</option>
@@ -359,7 +358,7 @@
                 
                   <div class="form-group">
                     <label>DVD / CD</label>
-                    <select class="form-control select2bs4" style="width: 100%;">
+                    <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
                       <option selected="selected">Alabama</option>
                       <option>Alaska</option>
                       <option>California</option>
@@ -372,7 +371,7 @@
               <div class="col-sm-4">
                 <div class="form-group">
                   <label>Additional devices</label>
-                  <textarea class="form-control" rows="3" placeholder="Add a comment"></textarea>
+                  <textarea class="form-control" rows="3" placeholder="Add a comment" disabled></textarea>
                 </div>
               </div>                
             </div>
@@ -385,7 +384,7 @@
                   
                     <div class="form-group">
                       <label>Additional settings</label>
-                      <select class="form-control select2bs4" style="width: 100%;">
+                      <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
                         <option selected="selected">Alabama</option>
                         <option>Alaska</option>
                         <option>California</option>
@@ -399,18 +398,12 @@
                   
                     <div class="form-group">
                       <label>Additional settings</label>
-                      <input type="text" class="form-control" placeholder="Name">
+                      <input type="text" class="form-control" placeholder="Name" disabled>
                     </div>
                   
                 </div>
               </div>
-              <div class="row">
-                <div class="col-sm-4 ">
-                  <div class="form-group">
-                    <button type="add" class="btn btn-primary">+ Add settings</button>
-                  </div>
-                </div>
-              </div>
+              
 
 
                 
@@ -438,7 +431,7 @@
                     
                     <div class="form-group">
                       <label>Employee</label>
-                      <select class="form-control select2bs4" style="width: 100%;">
+                      <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
                         <option selected="selected">Alabama</option>
                         <option>Alaska</option>
                         <option>California</option>
@@ -454,9 +447,7 @@
             
 
             <script>
-              $(document).ready(function() {
-                
-
+              $(document).ready(function() {              
                 $('#computer-form').on('submit', function(event) {
                   event.preventDefault();
                   var formData = $(this).serializeArray();
@@ -484,6 +475,42 @@
                 // Инициализация Inputmask
                 $(":input").inputmask();
               });
+
+              document.getElementById('addUserBtn').addEventListener('click', function() {
+                let container = document.getElementById('userContainer');
+                let userFields = `
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label>User type</label>
+                        <select class="form-control select2bs4" style="width: 100%;" name="user_type[]">
+                          {% for user_type, user_type_display in UserName.USER_TYPES %}
+                            <option value="{{ user_type }}">{{ user_type_display }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label>User name</label>
+                        <select class="form-control" name="user_name[]">
+                          {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.login }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row-sm-4">
+                    <div class="form-group">
+                      <label>User password</label>
+                      <input type="text" class="form-control" placeholder="Password" name="user_password[]">
+                    </div>
+                  </div>
+                `;
+                container.insertAdjacentHTML('beforeend', userFields);
+              });
+
             </script>
 
 

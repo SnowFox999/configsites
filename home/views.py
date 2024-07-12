@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from rest_framework.response import Response
 from django.contrib.auth.decorators import login_required
-from .models import Computer, Order_Computer, Customer, Location
+from .models import Computer, Order_Computer, Customer, Location, UserName
 from django.db.models import Q
 import json
 
@@ -18,10 +18,38 @@ def index(request):
 def computer_detail(request, computer_id):
     computer = get_object_or_404(Computer, pk=computer_id)
     customers = Customer.objects.all()
+    locations = Location.objects.all()
 
-    if request.method == 'GET':
+    if request.method == 'POST':
+        # Получаем данные из формы
+        computer_name = request.POST.get('computer_name')
+        serial_number = request.POST.get('serial_number')
+        user_types = request.POST.getlist('user_type[]')
+        user_names = request.POST.getlist('user_name[]')
+        user_passwords = request.POST.getlist('user_password[]')
+
+        # Обновляем информацию о компьютере
+        computer.name = computer_name
+        computer.serial_number = serial_number
+        computer.save()
+
+        # Удаляем старых пользователей
+        #computer.user.clear()
+        
+        # Добавляем новых пользователей
+        #for user_type, user_name, user_password in zip(user_types, user_names, user_passwords):
+        #    user = UserName.objects.create(
+        #        user_type=user_type,
+        #        login=user_name,
+        #        password=user_password
+        #    )
+        #    computer.user.add(user)
+
+        # Перенаправляем обратно на страницу
+        return redirect('computer_detail', computer_id=computer.id)
+
+    else:
         data = {
-  
             'name': computer.name,
             'status': computer.status,
             'location': list(computer.location.values('id', 'name')),
@@ -46,7 +74,13 @@ def computer_detail(request, computer_id):
             'customer': computer.customer.name if computer.customer else None,
             'employee': computer.employee.name if computer.employee else None,
         }
-        return render(request, 'home/computer_detail.html', {'computer': computer, 'customers': customers})
+        context = {
+            'computer': computer,
+            'customers': customers,
+            'locations': locations,  # Передаем locations в контекст
+        }
+        return render(request, 'home/computer_detail.html', context)
+        
 
 
 
