@@ -56,6 +56,7 @@ class Computer(models.Model):
     monitor = models.ManyToManyField('Monitor', blank=True) #Monitor
     admin = models.ManyToManyField('UserName', related_name='admin_computers', limit_choices_to={'user_type': 'Admin'})
     user = models.ManyToManyField('UserName', related_name='user_computers', limit_choices_to={'user_type': 'User'}, blank=True)
+    
     date = models.DateField(default=date.today)
     employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, related_name='computer', null=True)
     addSoftware = models.TextField(null=True, blank=True)
@@ -63,7 +64,8 @@ class Computer(models.Model):
     addComment = models.TextField(null=True, blank=True)
     addSettings = models.ManyToManyField('AdditionalSettings', blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
-    location = models.ManyToManyField('Location', related_name='location_computers')
+    windows = models.ManyToManyField('Windows', blank = False)
+    
 
 
     def __str__(self):
@@ -114,6 +116,7 @@ class TypeDB(models.Model):
     
 class LANcard(models.Model): 
     type = models.CharField(max_length=30) #lan card
+    series = models.CharField(max_length=30)
 
     def __str__(self):
         return self.type
@@ -159,6 +162,14 @@ class AdditionalSettings(models.Model):
 
     def __str__(self):
         return f'{self.name} - {self.text}'
+    
+class Windows(models.Model):
+    name = models.CharField(max_length=30)
+    licenseNumber = models.CharField(max_length=60)
+    licenseKeys = models.CharField(max_length=60)
+
+    def __str__(self):
+        return f'{self.name} - {self.licenseNumber} - {self.licenseKeys}'
     
 
 

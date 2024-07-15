@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Computer, Employee, Customer, Processor, RAM, DiskPlace, HardDisk, VideoCard, TypeDB, LANcard, Location, Monitor, UserName, AdditionalSettings, Order_Computer
+from .models import Computer, Employee, Customer, Processor, RAM, DiskPlace, HardDisk, VideoCard, TypeDB, LANcard, Location, Monitor, UserName, AdditionalSettings, Order_Computer, Windows
 
 admin.site.register(Computer)
 admin.site.register(Order_Computer)
@@ -16,5 +16,6 @@ admin.site.register(Location)
 admin.site.register(Monitor)
 admin.site.register(UserName)
 admin.site.register(AdditionalSettings)
+admin.site.register(Windows)
 
 # Register your models here.

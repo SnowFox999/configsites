@@ -48,29 +48,57 @@
           <div class="card-body">
             <form method="POST" action="{% url 'computer_detail' computer.id %}" id="computer-form">
               {% csrf_token %}
-              
+              <div class="row">
+                <div class="col-sm-4">
+                  <!-- text input -->
+                  <div class="form-group">
+                    <label for="select_customer">Customer</label>
+                    <select id="select_customer" name="select_customer" class="form-control select2bs4" style="width: 100%;">
+                        {% for customer in customers %}
+                        <option value="{{ customer.id }}" {% if computer.customer and computer.customer.id == customer.id %} selected {% endif %}>
+                            {{ customer.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                      
+                <div class="col-sm-4">
+                  <div class="form-group">
+                    <label for="select_location">Placement</label>
+                    <select id="select_location" name="select_location" class="form-control select2bs4" style="width: 100%;">
+                      {% for location in locations %}
+                      <option value="{{ location.id }}" {% if customer.computer.location and customer.computer.location.id == location.id %} selected {% endif %}>
+                          {{ location.name }}
+                      </option>
+                      {% endfor %}
+                  </select>
+                </div>
+                </div>
+              </div>
 
               <div class="row">
                 <div class="col-sm-4">
                   <!-- textarea -->
                   <div class="form-group">
                     <label>Customer name</label>
-                    <input type="text" class="form-control" placeholder="Customer name" value="{{ computer.customer.name }}" disabled>
+                    <input type="text" class="form-control" placeholder="Enter ..." disabled>
                   </div>
                 </div>
                 <div class="col-sm-4">
                   <div class="form-group">
                     <label>Placement</label>
-                    {% for location in data.locations %}
-                        <input type="text" class="form-control" placeholder="Placement" value="{{ location.name }}" disabled>
-                    {% endfor %}
+                    <input type="text" class="form-control" placeholder="Enter ..." disabled>
                   </div>
                 </div>
                 <div class="col-sm-4">
                   <div class="form-group">
                     <label>Computer type</label>
-                    <input type="text" class="form-control" placeholder="Placement" value="{{ computer.type }}" disabled>
-                      
+                    <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -81,96 +109,64 @@
                 <h4>Main Information</h4>
               </div>
               
-  <div class="row">
-    <div class="col-sm-4">
-        <div class="row-sm-4">
-            <div class="form-group">
-                <label>Computer name</label>
-                <input type="text" class="form-control" placeholder="Name" name="computer_name" value="{{ computer.name }}" disabled>
-            </div>
-        </div>
-        <div class="row">
-            
-            {% if data.admin %}
-                {% for admin in data.admin %}
-                    <div class="col-sm-5">
-                        <div class="form-group">
-                            <label>Admin type</label>
-                            <select class="form-control select2bs4" name="AdminType" disabled="disabled" style="width: 100%;">                   
-                              <option value="{{admin.user_type }}">{{ admin.user_type }}</option>                  
-                            </select>   
-                        </div>
+              <div class="row">
+                
+                <div class="col-sm-4">
+                  <div class="row-sm-4">
+                    <div class="form-group">
+                      <label>Computer name</label>
+                      <input type="text" class="form-control" placeholder="Name" name="computer_name" value="{{ computer.name }}" disabled>
                     </div>
-                    <div class="col-sm-7">
-                        <div class="form-group">
-                            <label>Admin name</label>
-                            <input type="text" class="form-control" placeholder="Admin name" value="{{ admin.login }}" disabled>
-                        </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label>User type</label>
+                        <select class="form-control select2bs4" style="width: 100%;" name="user_type[]" disabled="disabled">
+                          {% for user_type, user_type_display in UserName.USER_TYPES %}
+                            <option value="{{ user_type }}">{{ user_type_display }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
                     </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-        <div class="row">
-            {% if data.user %}
-                {% for user in data.user %}
-                    <div class="col-sm-5">
-                        <div class="form-group">
-                            <label>User type</label>
-                            <select class="form-control select2bs4" name="UserType" disabled="disabled" style="width: 100%;">                   
-                                <option value="{{ user.user_type }}">{{ user.user_type }}</option>                  
-                            </select>            
-                        </div>
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label>User name</label>
+                        <select class="form-control" name="user_name[]" value="{{ computer.admin.login }}" disabled="disabled">
+                          {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.login }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
                     </div>
-                    <div class="col-sm-7">
-                        <div class="form-group">
-                            <label>User name</label>
-                            <input type="text" class="form-control" placeholder="User name" value="{{ user.login }}" disabled>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
-        <div class="col-sm-4">
-            <div class="row-sm-4">
-                <div class="form-group">
-                    <label>Computer series number</label>
-                    <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" disabled>
+                  </div>
                 </div>
-            </div>
-            <div class="row-sm-4">
-                {% if data.admin %}
-                    {% for admin in data.admin %}
-                        <div class="form-group">
-                            <label>Admin password</label>
-                            <input type="text" class="form-control" placeholder="Admin password" value="{{ admin.password }}" disabled>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-            <div class="row-sm-4">
-                {% if data.user %}
-                    {% for user in data.user %}
-                        
-                            <div class="form-group">
-                                <label>User password</label>
-                                <input type="text" class="form-control" placeholder="User password" value="{{ user.password }}" disabled>
-                            </div>
-                        
-                    {% endfor %}
-                {% endif %}
-            </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="form-group">
-                <label>Comment</label>
-                <textarea class="form-control" rows="3" placeholder="Add a comment" name="comment" disabled>{{ computer.addComment }}</textarea> 
-            </div>
-        </div>
-    </div>
-</div>
+                
+ 
+                <div class="col-sm-4">
+                  <div class="row-sm-4">
+                    <div class="form-group">
+                      <label>Computer series number</label>
+                      <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" disabled>
+                    </div>
+                  </div>
+                  <div class="row-sm-4">
+                    <div class="form-group">
+                      <label>User password</label>
+                    <input type="text" class="form-control" placeholder="Name" name="user_password[]" value="{{ computer.admin.password }}" disabled>
+                    </div>
+                  </div>
+                </div>
 
 
+                <div class="col-sm-4">
+                  <div class="form-group">
+                    <label>Comment</label>
+                    <textarea class="form-control" rows="3" placeholder="Add a comment" name="comment" disabled>{{ computer.addComment }}</textarea> 
+                  </div>
+                </div>
+              </div>
+              
 
               
               
@@ -188,22 +184,21 @@
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>Processor</label>
-                      <select class="form-control select2bs4" name="Processor" disabled="disabled" style="width: 100%;">
-                      {% for processor in data.processor %}
-                          <option value="{{ processor.name }}">{{ processor.name }}</option>                      
-                      {% endfor %}
-                    </select>
-                     </div>
+                      <select class="form-control select2bs4" disabled="disabled" disabled="disabled" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
+                    </div>
                   </div>
                   <div class="row-sm-4">                    
                     <div class="form-group">
                       <label>Video card</label>
-                      <select class="form-control select2bs4" name="videoCard" disabled="disabled" style="width: 100%;">
-                      {% for videoCard in data.videoCard %}                         
-                          <option value="{{ videoCard.name }}">{{ videoCard.name }}</option>
-                          
-                      {% endfor %}
-                    </select>
+                      <select class="form-control select2bs4" disabled="disabled" disabled="disabled" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
                     </div>
                   </div>                   
                 </div>
@@ -213,21 +208,18 @@
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>LAN card</label>
-                      <select class="form-control select2bs4" name="lanCard" disabled="disabled" style="width: 100%;">
-                        {% for lanCard in data.lanCard %}
-                            <option value="{{ lanCard.type }}">{{ lanCard.type }}</option>
-                        {% endfor %}
-                    </select>
-                  </div>
-                  
+                      <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
+                      </select>
+                    </div>
                   </div>
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>LAN card series</label>
-                      {% for lanCard in data.lanCard %}
-                        <input type="text" class="form-control" placeholder="LAN series" name="lanSeries" value="{{ lanCard.series }}" disabled>                   
-                      {% endfor %}
-                      </div>
+                      <input type="text" class="form-control" placeholder="Name" disabled>
+                    </div>
                   </div>
                 </div>
 
@@ -237,19 +229,17 @@
                     <div class="col-sm-3">
                       <div class="form-group">
                         <label>RAM GB</label>
-                        <select class="form-control select2bs4" name="ramGB" disabled="disabled" style="width: 100%;">
-                          {% for ram in data.ram %}
-                            <option value="{{ ram.gigabytes }}">{{ ram.gigabytes }}</option>
-                          {% endfor %}
+                        <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
+                          <option selected="selected">Alabama</option>
+                          <option>Alaska</option>
+                          <option>California</option>
                         </select>
                       </div>
                     </div>
                     <div class="col-sm-9">
                       <div class="form-group">
                         <label>RAM type</label>
-                        {% for ram in data.ram %}
-                        <input type="text" class="form-control" placeholder="RAM type" name="ramType" value="{{ ram.type }}" disabled>                   
-                        {% endfor %}
+                        <input type="text" class="form-control" placeholder="Name" disabled>
                       </div>
                     </div>
                   </div>
@@ -257,19 +247,17 @@
                     <div class="col-sm-3">
                       <div class="form-group">
                         <label>Disk GB</label>
-                        <select class="form-control select2bs4" name="diskGB" disabled="disabled" style="width: 100%;">
-                          {% for hardDisk in data.hardDisk %}
-                            <option value="{{ hardDisk.gigabytes }}">{{ hardDisk.gigabytes }}</option>
-                          {% endfor %}
+                        <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
+                          <option selected="selected">Alabama</option>
+                          <option>Alaska</option>
+                          <option>California</option>
                         </select>
                       </div>
                     </div>
                     <div class="col-sm-9">
                       <div class="form-group">
                         <label>Hard disk type</label>
-                        {% for hardDisk in data.hardDisk %}
-                        <input type="text" class="form-control" placeholder="Hard Disk type" name="hardDiskType" value="{{ hardDisk.type }}" disabled>                   
-                        {% endfor %}
+                        <input type="text" class="form-control" placeholder="Name" disabled>
                       </div>
                     </div>
                   </div>
@@ -290,27 +278,23 @@
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Windows</label>
-                    <select class="form-control select2bs4" name="windowsName" disabled="disabled" style="width: 100%;">
-                      {% for windows in data.windows %}
-                        <option value="{{ windows.name }}">{{ windows.name }}</option>
-                      {% endfor %}
+                    <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
                     </select>
                   </div>
                 </div>
                 <div class="row-sm-4">                    
                   <div class="form-group">
                     <label>License number</label>
-                    {% for windows in data.windows %}
-                        <input type="text" class="form-control" placeholder="License number" name="licenseNumber" value="{{ windows.licenseNumber }}" disabled>                   
-                    {% endfor %}
+                    <input type="text" class="form-control" placeholder="Name" disabled>
                   </div>
                 </div>            
                 <div class="row-sm-4">                    
                   <div class="form-group">
                     <label>License keys</label>
-                    {% for windows in data.windows %}
-                        <input type="text" class="form-control" placeholder="License keys" name="licenseKeys" value="{{ windows.licenseKeys }}" disabled>                   
-                    {% endfor %}
+                    <input type="text" class="form-control" placeholder="Name" disabled>
                   </div>
                 </div>         
               </div>
@@ -320,19 +304,17 @@
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Database type</label>
-                    <select class="form-control select2bs4" name="typeDB" disabled="disabled" style="width: 100%;">
-                      {% for typeDB in data.typeDB %}
-                        <option value="{{ typeDB.type }}">{{ typeDB.type }}</option>
-                      {% endfor %}
+                    <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
                     </select>
                   </div>
                 </div>
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Database version</label>
-                    {% for typeDB in data.typeDB %}
-                        <input type="text" class="form-control" placeholder="Database version" name="versionDB" value="{{ typeDB.version }}" disabled>                   
-                    {% endfor %}
+                    <input type="text" class="form-control" placeholder="Name" disabled>
                   </div>
                 </div>
               </div>
@@ -341,7 +323,7 @@
               <div class="col-sm-4">
                 <div class="form-group">
                   <label>Additional software</label>
-                  <textarea class="form-control" rows="3" placeholder="Add a comment" value="{{ computer.addSoftware }}" disabled></textarea>
+                  <textarea class="form-control" rows="3" placeholder="Add a comment" disabled></textarea>
                 </div>
               </div>                
             </div>
@@ -357,34 +339,29 @@
             </div>
 
 
-            <div class="row">
+            <div class="row">               
               <div class="col-sm-4">
+                
                   <div class="form-group">
-                      <label>Monitor</label>
-                      <select class="form-control select2bs4" name="MonitorName" disabled="disabled" style="width: 100%;">
-                          {% for monitor in data.monitor %}
-                              {% if monitor.name %}
-                                  <option value="{{ monitor.name }}">{{ monitor.name }}</option>
-                              {% endif %}
-                              {% if monitor.custom_name %}
-                                  <option value="{{ monitor.custom_name }}">{{ monitor.custom_name }}</option>
-                              {% endif %}
-                          {% endfor %}
-                      </select>
+                    <label>Monitor</label>
+                    <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
+                    </select>
                   </div>
+                 
               </div>
-          
-          
               
 
               <div class="col-sm-4">
                 
                   <div class="form-group">
                     <label>DVD / CD</label>
-                    <select class="form-control select2bs4" name="DiskPlace" disabled="disabled" style="width: 100%;">
-                      {% for diskPlace in data.diskPlace %}
-                        <option value="{{ diskPlace.name }}">{{ diskPlace.name }}</option>
-                      {% endfor %}
+                    <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
+                      <option selected="selected">Alabama</option>
+                      <option>Alaska</option>
+                      <option>California</option>
                     </select>
                   </div>
                 
@@ -394,7 +371,7 @@
               <div class="col-sm-4">
                 <div class="form-group">
                   <label>Additional devices</label>
-                  <textarea class="form-control" rows="3" placeholder="Add a devices" value="{{ computer.addDevices }}" disabled></textarea>
+                  <textarea class="form-control" rows="3" placeholder="Add a comment" disabled></textarea>
                 </div>
               </div>                
             </div>
@@ -407,10 +384,10 @@
                   
                     <div class="form-group">
                       <label>Additional settings</label>
-                      <select class="form-control select2bs4" name="addSettings" disabled="disabled" style="width: 100%;">
-                        {% for addSetting in data.addSetting %}
-                          <option value="{{ addSetting.name }}">{{addSetting.name }}</option>
-                        {% endfor %}
+                      <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
                       </select>
                     </div>
                   
@@ -421,9 +398,7 @@
                   
                     <div class="form-group">
                       <label>Additional settings</label>
-                      {% for typeDB in data.typeDB %}
-                        <input type="text" class="form-control" placeholder="Additional settings" name="addSettingsText" value="{{ addSettings.text }}" disabled>                   
-                      {% endfor %}
+                      <input type="text" class="form-control" placeholder="Name" disabled>
                     </div>
                   
                 </div>
@@ -445,7 +420,7 @@
                           <div class="input-group-prepend">
                             <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                           </div>
-                          <input type="text" class="form-control" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask value="{{ computer.date|date:'d/m/Y' }}">
+                          <input type="text" class="form-control" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask>
                         </div>
                       </div>
                     
@@ -456,21 +431,46 @@
                     
                     <div class="form-group">
                       <label>Employee</label>
-                      <select class="form-control select2bs4" name="Employee" disabled="disabled" style="width: 100%;">
-                          {% for employee in data.employee %}
-                              <option value="{{ employee.name }}">{{ employee.name }}</option>
-                          {% endfor %}
+                      <select class="form-control select2bs4" disabled="disabled" style="width: 100%;">
+                        <option selected="selected">Alabama</option>
+                        <option>Alaska</option>
+                        <option>California</option>
                       </select>
                     </div>
                     
                   </div>
                 </div>                            
-              </div>            
+              </div>
+              
+              <div id="computer_data">
+                <p><strong>Name:</strong> <span id="computer_name">{{ computer.name }}</span></p>
+                <p><strong>Status:</strong> <span id="computer_status">{{ computer.status }}</span></p>
+                <p><strong>Serial Number:</strong> <span id="computer_serial_number">{{ computer.serial_number }}</span></p>
+                <p><strong>Type:</strong> <span id="computer_type">{{ computer.type }}</span></p>
+                <p><strong>Custom Type:</strong> <span id="computer_custom_type">{{ computer.custom_type }}</span></p>
+                <p><strong>Processor:</strong> <span id="computer_processor">{{ computer.processor.name }}</span></p>
+                <p><strong>RAM:</strong> <span id="computer_ram">{{ computer.ram.gigabytes }} GB</span></p>
+                <p><strong>Hard Disk:</strong> <span id="computer_hard_disk">{{ computer.hardDisk.gigabytes }} GB</span></p>
+                <p><strong>Disk Place:</strong> <span id="computer_disk_place">{{ computer.diskPlace.name }}</span></p>
+                <p><strong>Video Card:</strong> <span id="computer_video_card">{{ computer.videoCard.name }}</span></p>
+                <p><strong>Type DB:</strong> <span id="computer_type_db">{{ computer.typeDB.type }} {{ computer.typeDB.version }}</span></p>
+                <p><strong>LAN Card:</strong> <span id="computer_lan_card">{{ computer.lanCard.type }}</span></p>
+                <p><strong>Monitor:</strong> <span id="computer_monitor">{{ computer.monitor.name }} ({{ computer.monitor.custom_name }})</span></p>
+                <p><strong>Admin:</strong> <span id="computer_admin">{{ computer.admin.login }}</span></p>
+                <p><strong>User:</strong> <span id="computer_user">{{ computer.user.login }}</span></p>
+                <p><strong>Additional Software:</strong> <span id="computer_add_software">{{ computer.addSoftware }}</span></p>
+                <p><strong>Additional Devices:</strong> <span id="computer_add_devices">{{ computer.addDevices }}</span></p>
+                <p><strong>Comment:</strong> <span id="computer_add_comment">{{ computer.addComment }}</span></p>
+                <p><strong>Settings:</strong> <span id="computer_add_settings">{{ computer.addSettings.name }} - {{ computer.addSettings.text }}</span></p>
+                <p><strong>Customer:</strong> <span id="computer_customer">{{ computer.customer.name }}</span></p>
+                <p><strong>Employee:</strong> <span id="computer_employee">{{ computer.employee.name }}</span></p>
+            </div>
+
             </form>
 
 
             
-
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
             <script>
               $(document).ready(function() {              
                 $('#computer-form').on('submit', function(event) {
@@ -500,45 +500,59 @@
                 // Инициализация Inputmask
                 $(":input").inputmask();
               });
-
-              document.getElementById('addUserBtn').addEventListener('click', function() {
-                let container = document.getElementById('userContainer');
-                let userFields = `
-                  <div class="row">
-                    <div class="col-sm-6">
-                      <div class="form-group">
-                        <label>User type</label>
-                        <select class="form-control select2bs4" style="width: 100%;" name="user_type[]">
-                          {% for user_type, user_type_display in UserName.USER_TYPES %}
-                            <option value="{{ user_type }}">{{ user_type_display }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    </div>
-                    <div class="col-sm-6">
-                      <div class="form-group">
-                        <label>User name</label>
-                        <select class="form-control" name="user_name[]">
-                          {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.login }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row-sm-4">
-                    <div class="form-group">
-                      <label>User password</label>
-                      <input type="text" class="form-control" placeholder="Password" name="user_password[]">
-                    </div>
-                  </div>
-                `;
-                container.insertAdjacentHTML('beforeend', userFields);
-              });
-
             </script>
-
-
+            <script>
+              $(document).ready(function() {
+                  function updateComputerData(customerId, location) {
+                      $.ajax({
+                          url: "{% url 'get_computer_by_customer_and_location' %}",
+                          data: {
+                              'customer_id': customerId,
+                              'location': location
+                          },
+                          success: function(data) {
+                              // Обновляем данные на странице
+                              if (data.id) {
+                                  $('#computer_name').text(data.name);
+                                  $('#computer_status').text(data.status);
+                                  $('#computer_serial_number').text(data.serial_number);
+                                  $('#computer_type').text(data.type);
+                                  $('#computer_custom_type').text(data.custom_type);
+                                  $('#computer_processor').text(data.processor[0].name); // Assuming single processor
+                                  $('#computer_ram').text(data.ram[0].gigabytes + ' GB'); // Assuming single RAM
+                                  $('#computer_hard_disk').text(data.hardDisk[0].gigabytes + ' GB'); // Assuming single Hard Disk
+                                  $('#computer_disk_place').text(data.diskPlace[0].name); // Assuming single Disk Place
+                                  $('#computer_video_card').text(data.videoCard[0].name); // Assuming single Video Card
+                                  $('#computer_type_db').text(data.typeDB[0].type + ' ' + data.typeDB[0].version); // Assuming single Type DB
+                                  $('#computer_lan_card').text(data.lanCard[0].type); // Assuming single LAN Card
+                                  $('#computer_monitor').text(data.monitor[0].name + ' (' + data.monitor[0].custom_name + ')'); // Assuming single Monitor
+                                  $('#computer_admin').text(data.admin[0].login); // Assuming single Admin
+                                  $('#computer_user').text(data.user[0].login); // Assuming single User
+                                  $('#computer_add_software').text(data.addSoftware);
+                                  $('#computer_add_devices').text(data.addDevices);
+                                  $('#computer_add_comment').text(data.addComment);
+                                  $('#computer_add_settings').text(data.addSettings[0].name + ' - ' + data.addSettings[0].text); // Assuming single Setting
+                                  $('#computer_customer').text(data.customer);
+                                  $('#computer_employee').text(data.employee);
+                              } else {
+                                  alert('No computer found for this customer and location.');
+                              }
+                          }
+                      });
+                  }
+          
+                  $('#select_customer, #select_location').change(function() {
+                      var customerId = $('#select_customer').val();
+                      var location = $('#select_location').val();
+                      updateComputerData(customerId, location);
+                  });
+          
+                  // Первоначальная загрузка данных
+                  var initialCustomerId = $('#select_customer').val();
+                  var initialLocation = $('#select_location').val();
+                  updateComputerData(initialCustomerId, initialLocation);
+              });
+          </script>
 
 
            

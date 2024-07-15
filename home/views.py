@@ -18,15 +18,28 @@ def index(request):
 def computer_detail(request, computer_id):
     computer = get_object_or_404(Computer, pk=computer_id)
     customers = Customer.objects.all()
-    locations = Location.objects.all()
+    locations = computer.locations.values('name')
+
+    admins = list(computer.admin.values('user_type', 'login', 'password'))
+    users = list(computer.user.values('user_type', 'login', 'password'))
+    processors = list(computer.processor.values('name'))
+    videoCards = list(computer.videoCard.values('name'))
+    lanCards = list(computer.lanCard.values('type', 'series'))
+    rams = list(computer.ram.values('type', 'gigabytes'))
+    hardDisks = list(computer.hardDisk.values('type', 'gigabytes'))
+    windows = list(computer.windows.values('name', 'licenseNumber', 'licenseKeys'))
+    typeDBs = list(computer.typeDB.values('type', 'version'))
+    monitors = list(computer.monitor.values('name', 'custom_name'))
+    diskPlaces = list(computer.diskPlace.values('name'))
+    addSettings = list(computer.addSettings.values('name', 'text'))
+    employees = [{'name': computer.employee.name}] if computer.employee else []
 
     if request.method == 'POST':
         # Получаем данные из формы
         computer_name = request.POST.get('computer_name')
         serial_number = request.POST.get('serial_number')
-        user_types = request.POST.getlist('user_type[]')
-        user_names = request.POST.getlist('user_name[]')
-        user_passwords = request.POST.getlist('user_password[]')
+        
+        
 
         # Обновляем информацию о компьютере
         computer.name = computer_name
@@ -52,32 +65,34 @@ def computer_detail(request, computer_id):
         data = {
             'name': computer.name,
             'status': computer.status,
-            'location': list(computer.location.values('id', 'name')),
+            'locations': list(locations),
             'date': computer.date.strftime('%Y-%m-%d'),
             'serial_number': computer.serial_number,
             'type': computer.type,
             'custom_type': computer.custom_type,
-            'processor': list(computer.processor.values('id', 'name')),
-            'ram': list(computer.ram.values('id', 'type', 'gigabytes')),
-            'hardDisk': list(computer.hardDisk.values('id', 'type', 'gigabytes')),
-            'diskPlace': list(computer.diskPlace.values('id', 'name')),
-            'videoCard': list(computer.videoCard.values('id', 'name')),
-            'typeDB': list(computer.typeDB.values('id', 'type', 'version')),
-            'lanCard': list(computer.lanCard.values('id', 'type')),
-            'monitor': list(computer.monitor.values('id', 'name', 'custom_name')),
-            'admin': list(computer.admin.values('id', 'login', 'password')),
-            'user': list(computer.user.values('id', 'login', 'password')),
+            'processor': processors,
+            'ram': rams,
+            'hardDisk': hardDisks,
+            'diskPlace': diskPlaces,
+            'videoCard': videoCards,
+            'typeDB': typeDBs,
+            'lanCard': lanCards,
+            'monitor': monitors,
+            'admin': admins,
+            'user': users,
+            'windows': windows,
             'addSoftware': computer.addSoftware,
             'addDevices': computer.addDevices,
             'addComment': computer.addComment,
-            'addSettings': list(computer.addSettings.values('id', 'name', 'text')),
+            'addSetting': addSettings,
             'customer': computer.customer.name if computer.customer else None,
-            'employee': computer.employee.name if computer.employee else None,
+            'employee': employees,
         }
         context = {
             'computer': computer,
             'customers': customers,
-            'locations': locations,  # Передаем locations в контекст
+            'data': data,
+            
         }
         return render(request, 'home/computer_detail.html', context)
         
@@ -111,7 +126,7 @@ def computer_edit(request, computer_id):
         computer.addDevices = request.POST['addDevices']
         computer.addComment = request.POST['addComment']
         computer.addSettings = request.POST['addSettings']
-
+        
         computer.date = request.POST['date']
         computer.save()
         return JsonResponse({'message': 'Success'})
