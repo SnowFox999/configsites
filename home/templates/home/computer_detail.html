@@ -407,11 +407,13 @@
                   
                     <div class="form-group">
                       <label>Additional settings</label>
-                      <select class="form-control select2bs4" name="addSettings" disabled="disabled" style="width: 100%;">
-                        {% for addSetting in data.addSetting %}
-                          <option value="{{ addSetting.name }}">{{addSetting.name }}</option>
-                        {% endfor %}
-                      </select>
+                      {% for addSetting in data.addSetting %}
+                          <div class="mb-3">
+                              <select class="form-control select2bs4" name="addSettings" disabled="disabled" style="width: 100%;">
+                                  <option value="{{ addSetting.name }}">{{ addSetting.name }}</option>
+                              </select>
+                          </div>
+                      {% endfor %}
                     </div>
                   
                 </div>
@@ -421,8 +423,8 @@
                   
                     <div class="form-group">
                       <label>Additional settings</label>
-                      {% for typeDB in data.typeDB %}
-                        <input type="text" class="form-control" placeholder="Additional settings" name="addSettingsText" value="{{ addSettings.text }}" disabled>                   
+                      {% for addSetting in data.addSetting %}
+                        <input type="text" class="form-control mb-3" placeholder="Additional settings" name="addSettingsText" value="{{ addSetting.text }}" disabled>                   
                       {% endfor %}
                     </div>
                   
@@ -457,11 +459,13 @@
                     <div class="form-group">
                       <label>Employee</label>
                       <select class="form-control select2bs4" name="Employee" disabled="disabled" style="width: 100%;">
-                          {% for employee in data.employee %}
-                              <option value="{{ employee.name }}">{{ employee.name }}</option>
+                          {% for employee in employees %}
+                              <option value="{{ employee.id }}" {% if employee.id == computer.employee.id %}selected{% endif %}>
+                                  {{ employee.name }}
+                              </option>
                           {% endfor %}
                       </select>
-                    </div>
+                  </div>
                     
                   </div>
                 </div>                            

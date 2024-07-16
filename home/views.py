@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from rest_framework.response import Response
 from django.contrib.auth.decorators import login_required
-from .models import Computer, Order_Computer, Customer, Location, UserName
+from .models import Computer, Order_Computer, Customer, Location, UserName, Employee
 from django.db.models import Q
 import json
 
@@ -18,6 +18,7 @@ def index(request):
 def computer_detail(request, computer_id):
     computer = get_object_or_404(Computer, pk=computer_id)
     customers = Customer.objects.all()
+    employees = Employee.objects.all()
     locations = computer.locations.values('name')
 
     admins = list(computer.admin.values('user_type', 'login', 'password'))
@@ -32,7 +33,7 @@ def computer_detail(request, computer_id):
     monitors = list(computer.monitor.values('name', 'custom_name'))
     diskPlaces = list(computer.diskPlace.values('name'))
     addSettings = list(computer.addSettings.values('name', 'text'))
-    employees = [{'name': computer.employee.name}] if computer.employee else []
+    
 
     if request.method == 'POST':
         # Получаем данные из формы
@@ -86,11 +87,13 @@ def computer_detail(request, computer_id):
             'addComment': computer.addComment,
             'addSetting': addSettings,
             'customer': computer.customer.name if computer.customer else None,
-            'employee': employees,
+            'employees': computer.employee.name if computer.employee else None,
+            
         }
         context = {
             'computer': computer,
             'customers': customers,
+            'employees': employees,
             'data': data,
             
         }
