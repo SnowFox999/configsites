@@ -25,10 +25,10 @@ class Computer(models.Model):
     ]
 
     TYPE_CHOICES = [
-        ('Computer1', 'Fujitsu ESPRIMO P5011'),
-        ('Computer2', 'Fujitsu ESPRIMO G9013 ESTAR'),
-        ('Computer3', 'Fujitsu ESPRIMO P558/E85+'),
-        ('Computer4', 'Fujitsu ESPRIMO P557'),
+        ('Fujitsu ESPRIMO P5011', 'Fujitsu ESPRIMO P5011'),
+        ('Fujitsu ESPRIMO G9013 ESTAR', 'Fujitsu ESPRIMO G9013 ESTAR'),
+        ('Fujitsu ESPRIMO P558/E85+', 'Fujitsu ESPRIMO P558/E85+'),
+        ('Fujitsu ESPRIMO P557', 'Fujitsu ESPRIMO P557'),
     ]
     
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='computers') #connect to customer
@@ -42,9 +42,7 @@ class Computer(models.Model):
         if not self.type and not self.custom_type:
             raise ValidationError("Either 'type' or 'custom_type' must be filled.")
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
+   
 
     processor = models.ManyToManyField('Processor') #many processors to many computers
     ram = models.ManyToManyField('RAM') # many to many RAM

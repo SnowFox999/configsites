@@ -38,11 +38,44 @@
 
       <!-- Default box -->
       <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Title</h3>
-
+        <div class="card-header" style="display: flex; justify-content: space-between;">
+          <div style="display: flex; align-items: center;">
+              <a href="{% url 'order_list' %}" class="btn btn-primary" style="margin-right: 10px;">Back</a>
+              
+              <h3 class="card-title">Computer {{ computer.name }}</h3>
+              
+          </div>
+          <div class="ml-auto" style="display: flex; align-items: right;">                    
+  
+            <div class="btn-group btn-group-toggle" data-toggle="buttons" style="justify-content: flex-end;">
+              {% if computer.status == 'Progress' %}
+                  <label class="btn btn-danger active">
+                      <input type="radio" name="options" id="option_b1" autocomplete="off" checked> Progress
+                  </label>
+              {% elif computer.status == 'Ready' %}
+                  <label class="btn btn-primary active">
+                      <input type="radio" name="options" id="option_b2" autocomplete="off" checked> Ready
+                  </label>
+              {% elif computer.status == 'Confirm' %}
+                  <label class="btn btn-success active">
+                      <input type="radio" name="options" id="option_b3" autocomplete="off" checked> Confirm
+                  </label>
+              {% endif %}
+          </div>
           
+              <div style="margin-right: 10px;"></div>
+              <div class="ml-auto"> <!-- Кнопка "Edit" выравнивается справа -->
+                <a href="{% url 'computer_edit' computer_id=computer.id %}" class="btn btn-primary">Edit</a>
+              </div>
+
+          </div>
         </div>
+   
+    
+
+    
+    
+ 
         
           <!-- /.card-header -->
           <div class="card-body">
@@ -55,24 +88,39 @@
                   <!-- textarea -->
                   <div class="form-group">
                     <label>Customer name</label>
-                    <input type="text" class="form-control" placeholder="Customer name" value="{{ computer.customer.name }}" disabled>
+                    <select class="form-control select2bs4" name="Customer" disabled="disabled" style="width: 100%;">
+                      {% for customer in customers %}
+                          <option value="{{ customer.id }}" {% if customer.id == computer.customer.id %}selected{% endif %}>
+                              {{ customer.name }}
+                          </option>
+                      {% endfor %}
+                  </select>
+                    
                   </div>
                 </div>
                 <div class="col-sm-4">
                   <div class="form-group">
                     <label>Placement</label>
-                    {% for location in data.locations %}
-                        <input type="text" class="form-control" placeholder="Placement" value="{{ location.name }}" disabled>
-                    {% endfor %}
+                    <select class="form-control select2bs4" name="Placement" disabled="disabled" style="width: 100%;">
+                      {% for location in data.locations %}
+                          <option value="{{ location.name }}">{{ location.name }}</option>                      
+                      {% endfor %}
+                    </select>
                   </div>
                 </div>
                 <div class="col-sm-4">
                   <div class="form-group">
-                    <label>Computer type</label>
-                    <input type="text" class="form-control" placeholder="Placement" value="{{ computer.type }}" disabled>
-                      
+                      <label>Computer type</label>
+                      <select class="form-control select2bs4" name="Placement" disabled="disabled" style="width: 100%;">
+                          {% if data.custom_type %}
+                              <option value="{{ data.custom_type }}">{{ data.custom_type }}</option>
+                          {% else %}
+                              <option value="{{ data.type }}">{{ data.type }}</option>
+                          {% endif %}
+                      </select>
                   </div>
-                </div>
+              </div>
+              
               </div>
 
 <!-- MAIN INFORMATION BLOCK-->
@@ -168,7 +216,7 @@
             </div>
         </div>
     </div>
-</div>
+
 
 
 
@@ -301,7 +349,7 @@
                   <div class="form-group">
                     <label>License number</label>
                     {% for windows in data.windows %}
-                        <input type="text" class="form-control" placeholder="License number" name="licenseNumber" value="{{ windows.licenseNumber }}" disabled>                   
+                        <input type="text" class="form-control" placeholder="License number" name="licenseNumber" value="{{ windows.licenseNumber }}" data-inputmask="'mask': '*****-***-***-***'" disabled>                   
                     {% endfor %}
                   </div>
                 </div>            
@@ -309,7 +357,7 @@
                   <div class="form-group">
                     <label>License keys</label>
                     {% for windows in data.windows %}
-                        <input type="text" class="form-control" placeholder="License keys" name="licenseKeys" value="{{ windows.licenseKeys }}" disabled>                   
+                        <input type="text" class="form-control" placeholder="License keys" name="licenseKeys" value="{{ windows.licenseKeys }}" data-inputmask="'mask': '*****-*****-*****-*****-*****'" disabled>                   
                     {% endfor %}
                   </div>
                 </div>         
@@ -351,7 +399,7 @@
 
 <!-- ADDITIONAL DEVICES BLOCK-->    
  
-
+    {% if data.monitor or data.diskPlace or computer.addDevices %}
             <div class="col-12">
               <h4>Additional devices</h4>
             </div>
@@ -399,9 +447,10 @@
               </div>                
             </div>
 
-              
+    {% endif %}         
                 
- <!-- ADDITIONAL SETTINGS BLOCK-->              
+ <!-- ADDITIONAL SETTINGS BLOCK--> 
+    {% if data.addSetting %}             
               <div class="row">               
                 <div class="col-sm-4">
                   
@@ -430,7 +479,7 @@
                   
                 </div>
               </div>
-              
+    {% endif %}
 
 
                 
@@ -500,6 +549,10 @@
                     }
                   });
                 });
+
+                $(document).ready(function(){
+                  $(":input").inputmask();
+              });
 
                 // Инициализация Inputmask
                 $(":input").inputmask();

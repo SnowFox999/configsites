@@ -33,43 +33,19 @@ def computer_detail(request, computer_id):
     monitors = list(computer.monitor.values('name', 'custom_name'))
     diskPlaces = list(computer.diskPlace.values('name'))
     addSettings = list(computer.addSettings.values('name', 'text'))
+    computer_type = computer.custom_type if computer.custom_type else computer.type
     
 
-    if request.method == 'POST':
-        # Получаем данные из формы
-        computer_name = request.POST.get('computer_name')
-        serial_number = request.POST.get('serial_number')
-        
-        
+   
 
-        # Обновляем информацию о компьютере
-        computer.name = computer_name
-        computer.serial_number = serial_number
-        computer.save()
-
-        # Удаляем старых пользователей
-        #computer.user.clear()
-        
-        # Добавляем новых пользователей
-        #for user_type, user_name, user_password in zip(user_types, user_names, user_passwords):
-        #    user = UserName.objects.create(
-        #        user_type=user_type,
-        #        login=user_name,
-        #        password=user_password
-        #    )
-        #    computer.user.add(user)
-
-        # Перенаправляем обратно на страницу
-        return redirect('computer_detail', computer_id=computer.id)
-
-    else:
-        data = {
+ 
+    data = {
             'name': computer.name,
             'status': computer.status,
             'locations': list(locations),
             'date': computer.date.strftime('%Y-%m-%d'),
             'serial_number': computer.serial_number,
-            'type': computer.type,
+            'type': computer_type,
             'custom_type': computer.custom_type,
             'processor': processors,
             'ram': rams,
@@ -87,17 +63,17 @@ def computer_detail(request, computer_id):
             'addComment': computer.addComment,
             'addSetting': addSettings,
             'customer': computer.customer.name if computer.customer else None,
-            'employees': computer.employee.name if computer.employee else None,
-            
-        }
-        context = {
+            'employee': computer.employee.name if computer.employee else None,
+    }
+    
+    context = {
             'computer': computer,
             'customers': customers,
             'employees': employees,
             'data': data,
-            
-        }
-        return render(request, 'home/computer_detail.html', context)
+        } 
+        
+    return render(request, 'home/computer_detail.html', context)
         
 
 
