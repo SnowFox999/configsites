@@ -18,9 +18,19 @@
         <td><a href="{% url 'computer_detail' order.computer.id %}">{{ order.computer.customer.name }}</td>
         <td><a href="{% url 'computer_detail' order.computer.id %}">{{ order.computer.date }}</td>
         <td>
-          <span class="tag {% if order.computer.status == 'Confirm' %}tag-success{% elif order.computer.status == 'Ready' %}tag-warning{% elif order.computer.status == 'Progress' %}tag-danger{% else %}tag-primary{% endif %}">
-            {{ order.computer.status }}
-          </span>
+          <span class="badge 
+          {% if order.computer.status == 'Confirm' %}
+              badge-success
+          {% elif order.computer.status == 'Ready' %}
+              badge-primary
+          {% elif order.computer.status == 'Progress' %}
+              badge-danger
+          {% else %}
+              badge-warning
+          {% endif %}
+      ">
+          {{ order.computer.status }}
+      </span>
         </td>
       </tr>
       {% empty %}
