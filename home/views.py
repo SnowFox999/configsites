@@ -21,8 +21,9 @@ def computer_detail(request, computer_id):
     employees = Employee.objects.all()
     locations = computer.locations.values('name')
 
-    admins = list(computer.admin.values('user_type', 'login', 'password'))
-    users = list(computer.user.values('user_type', 'login', 'password'))
+    
+    users = list(computer.user.values('user_type', 'login', 'password', 'id'))
+    print(users)
     processors = list(computer.processor.values('name'))
     videoCards = list(computer.videoCard.values('name'))
     lanCards = list(computer.lanCard.values('type', 'series'))
@@ -55,7 +56,7 @@ def computer_detail(request, computer_id):
             'typeDB': typeDBs,
             'lanCard': lanCards,
             'monitor': monitors,
-            'admin': admins,
+            
             'user': users,
             'windows': windows,
             'addSoftware': computer.addSoftware,
@@ -102,21 +103,10 @@ def computer_edit(request, computer_id):
         computer.addComment = request.POST.get('addComment')
         computer.date = request.POST.get('date')
 
-        admin_ids = request.POST.getlist('admin')
-        user_ids = request.POST.getlist('user')
+       
+        
 
-        # Очищаем текущие связи
-        computer.admin.clear()
-        computer.user.clear()
-
-        # Добавляем новые связи
-        for admin_id in admin_ids:
-            admin = UserName.objects.get(pk=admin_id)
-            computer.admin.add(admin)
-
-        for user_id in user_ids:
-            user = UserName.objects.get(pk=user_id)
-            computer.user.add(user)
+        
        
 
         # Для связанных объектов обработка может быть сложнее, в зависимости от того, как у вас настроены модели.
@@ -137,29 +127,42 @@ def computer_edit(request, computer_id):
             location, created = Location.objects.get_or_create(name=location_name, computer=computer)
             computer.locations.clear()
             computer.locations.add(location)
+
+        user = request.POST.get('user')
+        if user:
+            # Assuming `user` is a ManyToManyField or ForeignKey, handle it appropriately
+            computer.users.clear()
+            user_ids = user.split(',')  # Assuming user ids are sent as a comma-separated string
+            for user_id in user_ids:
+                user_instance = get_object_or_404(UserName, pk=user_id)
+                computer.user.add(user_instance)
         
         # Сохранение изменений
         computer.save()
         return JsonResponse({'message': 'Success'})
 
     else:
-        admins = UserName.objects.filter(user_type='Admin')
-        users = UserName.objects.filter(user_type='User')
-        # Обработка GET-запроса для отображения формы редактирования
+       
+       
+
+    
+        print(UserName.objects.all())
+
         context = {
             'computer': computer,
             'customers': Customer.objects.all(),
             'employees': Employee.objects.all(),
             'locations': Location.objects.all(),
-            'type_choices': [choice[0] for choice in Computer.TYPE_CHOICES],
-            'admin_list': UserName.objects.filter(user_type='Admin'),  # Исправлено на admin_list
-            'user_list': UserName.objects.filter(user_type='User'),     # Исправлено на user_list
-            'user_types': [user_type.user_type for user_type in UserName.objects.all()],
+            'type_choices': Computer.TYPE_CHOICES,
+          
+            'users': UserName.objects.filter(computer=computer),
             
             
-            # Добавьте в контекст все необходимые данные для формы
         }
+    
+
         return render(request, 'home/computer_edit.html', context)
+    
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 

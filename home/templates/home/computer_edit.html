@@ -92,21 +92,18 @@ function handleKeyPress(event) {
 </script>
 
 <script>
-  document.getElementById("add-user-btn").addEventListener("click", function() {
-    // Get the existing user selection section
-    const userSection = document.querySelector(".user-selection");
-
-    // Clone the first user selection row (assuming it has the structure)
-    const newRow = userSection.firstElementChild.cloneNode(true);
-
-    // Clear any existing values in the cloned row (optional)
-    newRow.querySelectorAll("input[type='text']").forEach(input => input.value = "");
-
-    // Append the cloned row to the user selection section
-    userSection.appendChild(newRow);
+  $(document).ready(function(){
+      $('#addUserBtn').click(function(){
+          // Клонируем блок с пользователем
+          var newUserRow = $('.user-row:first').clone();
+          // Обнуляем значения полей в новом блоке
+          newUserRow.find('input').val('');
+          newUserRow.find('select').val('');
+          // Вставляем клонированный блок после последнего блока с пользователем
+          newUserRow.insertAfter('.user-row:last');
+      });
   });
 </script>
-
 
 
   <!-- Content Wrapper. Contains page content -->
@@ -239,64 +236,45 @@ function handleKeyPress(event) {
         <div class="col-sm-6">
           <div class="form-group">
             <label>Computer series number</label>
-            <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" disabled>
+            <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" >
           </div>
         </div>
       </div>
 
-      <div class="row">
-        {% if admin_list %}
-            {% for admin_item in admin_list %}
+
+      {% if users %}
+      {% for user in users %}
+      <div class="row user-row">
+
                 <div class="col-sm-2">
-                    <div class="form-group">
-                        <label>User type</label>
-                        <select class="form-control select" name="AdminType" style="width: 100%;">
-                            <option value="{{ admin_item.pk }}">{{ admin_item.user_type }}</option>
-                        </select>
-                    </div>
+                  <div class="form-group">
+                    <label>User type</label>
+                    
+                    <select class="form-control select" name="UserType" style="width: 100%;">   
+                      {% for user in users %}                
+                      <option value="{{ user.user_type }}">{{ user.user_type }}</option>   
+                      {% endfor %}               
+                  </select> 
+                  
+                </div>
+                
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label>User name</label>
-                        <input type="text" class="form-control" name="AdminName" placeholder="Admin name" value="{{ admin_item.login }}">
+                        <input type="text" class="form-control" name="user_name_{{ user.pk }}" placeholder="User name" value="{{ user.login }}">
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <div class="form-group">
-                        <label>User password</label>
-                        <input type="text" class="form-control" placeholder="Admin password" value="{{ admin_item.password }}" disabled>
-                    </div>
-                </div>
-            {% endfor %}
-        {% endif %}
-    </div>
-    
-    <div class="row">
-        {% if user_list %}
-            {% for user_item in user_list %}
-                <div class="col-sm-2">
-                    <div class="form-group">
-                        <label>User type</label>
-                        <select class="form-control select" name="UserType" style="width: 100%;">
-                            <option value="{{ user_item.user_type }}">{{ user_item.user_type }}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="form-group">
-                        <label>User name</label>
-                        <input type="text" class="form-control" placeholder="User name" value="{{ user_item.login }}">
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label>User password</label>
-                        <input type="text" class="form-control" placeholder="User password" value="{{ user_item.password }}" disabled>
-                    </div>
-                </div>
-            {% endfor %}
-        {% endif %}
-    </div>
+                  <div class="form-group">
+                      <label>User password</label>
+                      <input type="text" class="form-control" name="password_{{ user.pk }}" placeholder="User password" value="{{ user.password }}">
+                  </div>
+              </div>
+  
+      </div>
+      {% endfor %}
+      {% endif %}
     
     
 
@@ -315,6 +293,10 @@ function handleKeyPress(event) {
             </div>
         </div>
     </div>
+    <div class="mt-3 col-md-12">
+      
+    </div>
+
     
 
 

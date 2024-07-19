@@ -52,8 +52,8 @@ class Computer(models.Model):
     typeDB = models.ManyToManyField('TypeDB') #type of data base
     lanCard = models.ManyToManyField('LANcard') # netzwerkkarte
     monitor = models.ManyToManyField('Monitor', blank=True) #Monitor
-    admin = models.ManyToManyField('UserName', related_name='admin_computers', limit_choices_to={'user_type': 'Admin'})
-    user = models.ManyToManyField('UserName', related_name='user_computers', limit_choices_to={'user_type': 'User'}, blank=True)
+    
+    user = models.ManyToManyField('UserName', blank=True)
     
     date = models.DateField(default=date.today)
     employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, related_name='computer', null=True)
@@ -147,12 +147,12 @@ class UserName(models.Model):
     ('User', 'User'),
 ]
 
-    user_type = models.CharField(max_length=5, choices=USER_TYPES, default='Admin')
-    login = models.CharField(max_length=20, unique=False, default='Administrator')
-    password = models.CharField(max_length=20, unique=False, default='icom')
+    user_type = models.CharField(max_length=5, choices=USER_TYPES)
+    login = models.CharField(max_length=20, unique=False,)
+    password = models.CharField(max_length=20, unique=False)
 
     def __str__(self):
-        return f'{self.get_user_type_display()} - {self.login} - {self.password}'
+        return f'{self.login} - {self.password}'
     
 class AdditionalSettings(models.Model):
     name = models.CharField(max_length=30)

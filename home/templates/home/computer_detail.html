@@ -121,7 +121,7 @@
                   </div>
               </div>
               
-              </div>
+              
 
 <!-- MAIN INFORMATION BLOCK-->
     
@@ -129,94 +129,68 @@
                 <h4>Main Information</h4>
               </div>
               
-  <div class="row">
-    <div class="col-sm-4">
-        <div class="row-sm-4">
-            <div class="form-group">
-                <label>Computer name</label>
-                <input type="text" class="form-control" placeholder="Name" name="computer_name" value="{{ computer.name }}" disabled>
-            </div>
-        </div>
-        <div class="row">
-            
-            {% if data.admin %}
-                {% for admin in data.admin %}
-                    <div class="col-sm-5">
-                        <div class="form-group">
-                            <label>Admin type</label>
-                            <select class="form-control select2bs4" name="AdminType" disabled="disabled" style="width: 100%;">                   
-                              <option value="{{admin.user_type }}">{{ admin.user_type }}</option>                  
-                            </select>   
-                        </div>
+              <div class="col-sm-8">   
+                <div class="row">
+                  <div class="col-sm-6">
+                      <div class="form-group">
+                          <label>Computer name</label>
+                          <input type="text" class="form-control" placeholder="Name" name="computer_name" value="{{ computer.name }}">
+                      </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label>Computer series number</label>
+                      <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" >
                     </div>
-                    <div class="col-sm-7">
-                        <div class="form-group">
-                            <label>Admin name</label>
-                            <input type="text" class="form-control" placeholder="Admin name" value="{{ admin.login }}" disabled>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-        <div class="row">
-            {% if data.user %}
-                {% for user in data.user %}
-                    <div class="col-sm-5">
-                        <div class="form-group">
-                            <label>User type</label>
-                            <select class="form-control select2bs4" name="UserType" disabled="disabled" style="width: 100%;">                   
-                                <option value="{{ user.user_type }}">{{ user.user_type }}</option>                  
-                            </select>            
-                        </div>
-                    </div>
-                    <div class="col-sm-7">
-                        <div class="form-group">
-                            <label>User name</label>
-                            <input type="text" class="form-control" placeholder="User name" value="{{ user.login }}" disabled>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
-        <div class="col-sm-4">
-            <div class="row-sm-4">
-                <div class="form-group">
-                    <label>Computer series number</label>
-                    <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" disabled>
+                  </div>
                 </div>
-            </div>
-            <div class="row-sm-4">
-                {% if data.admin %}
-                    {% for admin in data.admin %}
-                        <div class="form-group">
-                            <label>Admin password</label>
-                            <input type="text" class="form-control" placeholder="Admin password" value="{{ admin.password }}" disabled>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-            <div class="row-sm-4">
-                {% if data.user %}
-                    {% for user in data.user %}
-                        
-                            <div class="form-group">
-                                <label>User password</label>
-                                <input type="text" class="form-control" placeholder="User password" value="{{ user.password }}" disabled>
-                            </div>
-                        
-                    {% endfor %}
-                {% endif %}
-            </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="form-group">
-                <label>Comment</label>
+          
                 
-                <textarea class="form-control" rows="3" placeholder="Add a comment" disabled>{{ computer.addComment }}</textarea>
-            </div>
-        </div>
-    </div>
+                <div class="row">
+                  {% if data.user %}
+                      {% for user in data.user %}
+                          <div class="col-sm-2">
+                              <div class="form-group">
+                                  <label>User type</label>
+                                  <select class="form-control select" name="UserType" style="width: 100%;">   
+                                      <option value="{{ user.user_type }}">{{ user.user_type }}</option>   
+                                  </select>
+                              </div>
+                          </div>
+                          <div class="col-sm-4">
+                              <div class="form-group">
+                                  <label>User name</label>
+                                  <input type="text" class="form-control" placeholder="User name" value="{{ user.login }}">
+                              </div>
+                          </div>
+                          <div class="col-sm-6">
+                              <div class="form-group">
+                                  <label>User password</label>
+                                  <input type="text" class="form-control"  placeholder="User password" value="{{ user.password }}">
+                              </div>
+                          </div>
+                      {% endfor %}
+                  {% endif %}
+              </div>
+              
+              
+              
+          
+                 
+                </div>
+          
+          
+          
+                  <div class="col-sm-4">
+                      <div class="form-group">
+                          <label>Comment</label>
+                          
+                          <textarea class="form-control" rows="3" placeholder="Add a comment" >{{ computer.addComment }}</textarea>
+                      </div>
+                  </div>
+                </div>
+              
+              
 
 
 
