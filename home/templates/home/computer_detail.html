@@ -134,13 +134,13 @@
                   <div class="col-sm-6">
                       <div class="form-group">
                           <label>Computer name</label>
-                          <input type="text" class="form-control" placeholder="Name" name="computer_name" value="{{ computer.name }}">
+                          <input type="text" class="form-control" placeholder="Name" name="computer_name" value="{{ computer.name }}" disabled>
                       </div>
                   </div>
                   <div class="col-sm-6">
                     <div class="form-group">
                       <label>Computer series number</label>
-                      <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" >
+                      <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" disabled>
                     </div>
                   </div>
                 </div>
@@ -152,7 +152,7 @@
                           <div class="col-sm-2">
                               <div class="form-group">
                                   <label>User type</label>
-                                  <select class="form-control select" name="UserType" style="width: 100%;">   
+                                  <select class="form-control select" name="UserType" style="width: 100%;" disabled>   
                                       <option value="{{ user.user_type }}">{{ user.user_type }}</option>   
                                   </select>
                               </div>
@@ -160,13 +160,13 @@
                           <div class="col-sm-4">
                               <div class="form-group">
                                   <label>User name</label>
-                                  <input type="text" class="form-control" placeholder="User name" value="{{ user.login }}">
+                                  <input type="text" class="form-control" placeholder="User name" value="{{ user.login }}" disabled>
                               </div>
                           </div>
                           <div class="col-sm-6">
                               <div class="form-group">
                                   <label>User password</label>
-                                  <input type="text" class="form-control"  placeholder="User password" value="{{ user.password }}">
+                                  <input type="text" class="form-control"  placeholder="User password" value="{{ user.password }}" disabled>
                               </div>
                           </div>
                       {% endfor %}
@@ -185,7 +185,7 @@
                       <div class="form-group">
                           <label>Comment</label>
                           
-                          <textarea class="form-control" rows="3" placeholder="Add a comment" >{{ computer.addComment }}</textarea>
+                          <textarea class="form-control" rows="3" placeholder="Add a comment" disabled>{{ computer.addComment }}</textarea>
                       </div>
                   </div>
                 </div>

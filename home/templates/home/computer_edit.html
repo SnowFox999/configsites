@@ -11,8 +11,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.7-beta.22/jquery.inputmask.min.js"></script>
+
 <script>
-  function addNewCustomer() {
+  function addNew() {
     var input = document.getElementbyId('customerInput');
     var datalist = document.getElementbyId('customerList');
     var newValue = input.value;
@@ -35,61 +36,14 @@
 function handleKeyPress(event) {
   if (event.key == 'Enter') {
     event.preventDefault();
-    addNewCustomer();
+    addNew();
   }
 }
 </script>
 
-<script>
-  function addNewLocation() {
-    var input = document.getElementbyId('locationInput');
-    var datalist = document.getElementbyId('locationList');
-    var newValue = input.value;
 
-    var exists = false;
-    for (var i=0; i < datalist.options.length; i++) {
-      if (datalist.options[i].value == newValue) {
-        exists = true;
-        break;
-      }
-    }
 
-  if (!exists && newValue !== '') {
-    var newOption = document.createElement('option');
-    newOption.value = newValue;
-    datalist.appendChild(newOption);
-  }
-}
 
-function handleKeyPress(event) {
-  if (event.key == 'Enter') {
-    event.preventDefault();
-    addNewLocation();
-  }
-}
-</script>
-
-<script>
-  function addNewComputerType() {
-    var input = document.getElementbyId('computerTypeInput');
-    var datalist = document.getElementbyId('computerTypeList');
-    var newValue = input.value;
-
-    var exists = false;
-    for (var i=0; i < datalist.options.length; i++) {
-      if (datalist.options[i].value == newValue) {
-        exists = true;
-        break;
-      }
-    }
-
-  if (!exists && newValue !== '') {
-    var newOption = document.createElement('option');
-    newOption.value = newValue;
-    datalist.appendChild(newOption);
-  }
-}
-</script>
 
 <script>
   $(document).ready(function(){
@@ -104,6 +58,22 @@ function handleKeyPress(event) {
       });
   });
 </script>
+
+
+<script>
+  $(document).ready(function(){
+      $('#addSettingsBtn').click(function(){
+          // Клонируем блок с пользователем
+          var newUserRow = $('.add-settings:first').clone();
+          // Обнуляем значения полей в новом блоке
+          newUserRow.find('input').val('');
+          newUserRow.find('select').val('');
+          // Вставляем клонированный блок после последнего блока с пользователем
+          newUserRow.insertAfter('.add-settings:last');
+      });
+  });
+</script>
+
 
 
   <!-- Content Wrapper. Contains page content -->
@@ -180,7 +150,7 @@ function handleKeyPress(event) {
                   <!-- textarea -->
                   <div class="form-group">
                     <label>Customer name</label>
-                    <input list="customerList" id="customerInput" name="Customer" class="form-control" value="{{ computer.customer.name }}" placeholder="Customer name" style="width: 100%" onblur="addNewCustomer()" onkeypress="handleKeyPress(event)">
+                    <input list="customerList" id="customerInput" name="Customer" class="form-control" value="{{ computer.customer.name }}" placeholder="Customer name" style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
                     <datalist id="customerList">
                       {% for customer in customers %}
                       <option value="{{ customer.name }}">
@@ -194,7 +164,7 @@ function handleKeyPress(event) {
                     <label>Placement</label>
                     <input list="locationList" id="locationInput" name="Location" class="form-control" 
                           value="{{ computer.locations.first.name }}" placeholder="Placement" 
-                          style="width: 100%" onblur="addNewLocation()" onkeypress="handleKeyPress(event)">
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
                     <datalist id="locationList">
                       {% for location in locations %}
                       <option value="{{ location.name }}">
@@ -208,7 +178,7 @@ function handleKeyPress(event) {
                     <label>Computer type</label>
                     <input list="computerTypeList" id="computerTypeInput" name="ComputerType" class="form-control" 
                           value="{% if computer.custom_type %}{{ computer.custom_type }}{% else %}{{ computer.type }}{% endif %}" 
-                          placeholder="Computer type" style="width: 100%" onblur="addNewComputerType()" onkeypress="handleKeyPress(event)">
+                          placeholder="Computer type" style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
                     <datalist id="computerTypeList">
                         {% for choice in type_choices %}
                             <option value="{{ choice }}">{{ choice }}</option>
@@ -249,12 +219,19 @@ function handleKeyPress(event) {
                 <div class="col-sm-2">
                   <div class="form-group">
                     <label>User type</label>
+
+                    <input list="userList" id="usersInput" name="User" class="form-control" 
+                          value="{{ user.user_type }}" placeholder="User type" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="processorList">
+                        {% for user in users %}
+                          <option value="{{ user.user_type }}">
+                        {% endfor %}       
+                      </datalist>
+
+
                     
-                    <select class="form-control select" name="UserType" style="width: 100%;">   
-                      {% for user in users %}                
-                      <option value="{{ user.user_type }}">{{ user.user_type }}</option>   
-                      {% endfor %}               
-                  </select> 
+                    
                   
                 </div>
                 
@@ -318,22 +295,32 @@ function handleKeyPress(event) {
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>Processor</label>
-                      <select class="form-control select2bs4" name="Processor" disabled="disabled" style="width: 100%;">
-                      {% for processor in data.processor %}
-                          <option value="{{ processor.name }}">{{ processor.name }}</option>                      
-                      {% endfor %}
-                    </select>
+                      <input list="processorList" id="processorsInput" name="Processor" class="form-control" 
+                          value="{{ computer.processor.first.name }}" placeholder="Processor" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="processorList">
+                        {% for processor in processors %}
+                          <option value="{{ processor.name }}">
+                        {% endfor %}       
+                      </datalist>
+
                      </div>
                   </div>
                   <div class="row-sm-4">                    
                     <div class="form-group">
                       <label>Video card</label>
-                      <select class="form-control select2bs4" name="videoCard" disabled="disabled" style="width: 100%;">
-                      {% for videoCard in data.videoCard %}                         
-                          <option value="{{ videoCard.name }}">{{ videoCard.name }}</option>
-                          
-                      {% endfor %}
-                    </select>
+
+                      <input list="videoCardList" id="videoCardsInput" name="videoCard" class="form-control" 
+                          value="{{ computer.videoCard.first.name }}" placeholder="Video card" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="videoCardList">
+                        {% for videoCard in videoCards %}
+                          <option value="{{ videoCard.name }}">
+                        {% endfor %}       
+                      </datalist>
+
+
+                     
                     </div>
                   </div>                   
                 </div>
@@ -343,20 +330,27 @@ function handleKeyPress(event) {
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>LAN card</label>
-                      <select class="form-control select2bs4" name="lanCard" disabled="disabled" style="width: 100%;">
-                        {% for lanCard in data.lanCard %}
-                            <option value="{{ lanCard.type }}">{{ lanCard.type }}</option>
-                        {% endfor %}
-                    </select>
+
+                      <input list="lanCardList" id="lanCardsInput" name="lanCard" class="form-control" 
+                          value="{{ computer.lanCard.first.type }}" placeholder="LAN card" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="lanCardList">
+                        {% for lanCard in lanCards %}
+                          <option value="{{ lanCard.type }}">
+                        {% endfor %}       
+                      </datalist>
+
+
+                      
                   </div>
                   
                   </div>
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>LAN card series</label>
-                      {% for lanCard in data.lanCard %}
-                        <input type="text" class="form-control" placeholder="LAN series" name="lanSeries" value="{{ lanCard.series }}" disabled>                   
-                      {% endfor %}
+                      <input type="text" class="form-control" placeholder="LAN series" name="lanSeries" 
+                      value="{{ computer.lanCard.first.series }}">
+                      
                       </div>
                   </div>
                 </div>
@@ -367,19 +361,30 @@ function handleKeyPress(event) {
                     <div class="col-sm-3">
                       <div class="form-group">
                         <label>RAM GB</label>
-                        <select class="form-control select2bs4" name="ramGB" disabled="disabled" style="width: 100%;">
-                          {% for ram in data.ram %}
-                            <option value="{{ ram.gigabytes }}">{{ ram.gigabytes }}</option>
-                          {% endfor %}
-                        </select>
+                        <select class="form-control select" name="Ram" style="width: 100%;">   
+                          {% for ram in rams %}                
+                          <option value="{{ ram.gigabytes }}">{{ ram.gigabytes }}</option>   
+                          {% endfor %}               
+                        </select> 
+
+                       
                       </div>
                     </div>
                     <div class="col-sm-9">
                       <div class="form-group">
                         <label>RAM type</label>
-                        {% for ram in data.ram %}
-                        <input type="text" class="form-control" placeholder="RAM type" name="ramType" value="{{ ram.type }}" disabled>                   
-                        {% endfor %}
+
+                        <input list="ramList" id="ramsInput" name="ram" class="form-control" 
+                          value="{{ computer.ram.first.type }}" placeholder="RAM type" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="ramList">
+                        {% for ram in rams %}
+                          <option value="{{ ram.type }}">
+                        {% endfor %}       
+                      </datalist>
+
+
+                        
                       </div>
                     </div>
                   </div>
@@ -387,8 +392,8 @@ function handleKeyPress(event) {
                     <div class="col-sm-3">
                       <div class="form-group">
                         <label>Disk GB</label>
-                        <select class="form-control select2bs4" name="diskGB" disabled="disabled" style="width: 100%;">
-                          {% for hardDisk in data.hardDisk %}
+                        <select class="form-control select" name="diskGB" style="width: 100%;">
+                          {% for hardDisk in hardDisks %}
                             <option value="{{ hardDisk.gigabytes }}">{{ hardDisk.gigabytes }}</option>
                           {% endfor %}
                         </select>
@@ -397,9 +402,18 @@ function handleKeyPress(event) {
                     <div class="col-sm-9">
                       <div class="form-group">
                         <label>Hard disk type</label>
-                        {% for hardDisk in data.hardDisk %}
-                        <input type="text" class="form-control" placeholder="Hard Disk type" name="hardDiskType" value="{{ hardDisk.type }}" disabled>                   
-                        {% endfor %}
+
+                        <input list="hardDiskList" id="hardDisksInput" name="hardDisk" class="form-control" 
+                          value="{{ computer.hardDisk.first.type }}" placeholder="Hard disk type" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="hardDiskList">
+                        {% for hardDisk in hardDisks %}
+                          <option value="{{ hardDisk.type }}">
+                        {% endfor %}       
+                      </datalist>
+
+
+                        
                       </div>
                     </div>
                   </div>
@@ -417,52 +431,62 @@ function handleKeyPress(event) {
 
             <div class="row">               
               <div class="col-sm-4">
-                <div class="row-sm-4">
-                  <div class="form-group">
-                    <label>Windows</label>
-                    <select class="form-control select2bs4" name="windowsName" disabled="disabled" style="width: 100%;">
-                      {% for windows in data.windows %}
-                        <option value="{{ windows.name }}">{{ windows.name }}</option>
-                      {% endfor %}
-                    </select>
+                  <div class="row-sm-4">
+                      <div class="form-group">
+                          <label>Windows</label>
+
+                          <input list="windowsList" id="windowsInput" name="Windows" class="form-control" 
+                          value="{{ computer.windowses.first.name }}" placeholder="Windows" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                          <datalist id="windowsList">
+                            {% for windows in windowses %}
+                            <option value="{{ windows.name }}">
+                            {% endfor %}       
+                          </datalist>
+ 
+                      </div>
                   </div>
-                </div>
-                <div class="row-sm-4">                    
-                  <div class="form-group">
-                    <label>License number</label>
-                    {% for windows in data.windows %}
-                        <input type="text" class="form-control" placeholder="License number" name="licenseNumber" value="{{ windows.licenseNumber }}" data-inputmask="'mask': '*****-***-***-***'" disabled>                   
-                    {% endfor %}
-                  </div>
-                </div>            
-                <div class="row-sm-4">                    
-                  <div class="form-group">
-                    <label>License keys</label>
-                    {% for windows in data.windows %}
-                        <input type="text" class="form-control" placeholder="License keys" name="licenseKeys" value="{{ windows.licenseKeys }}" data-inputmask="'mask': '*****-*****-*****-*****-*****'" disabled>                   
-                    {% endfor %}
-                  </div>
-                </div>         
+                  <div class="row-sm-4">                    
+                      <div class="form-group">
+                          <label>License number</label>
+                          <input type="text" class="form-control" placeholder="License number" name="licenseNumber" 
+                                 value="{{ computer.windowses.first.licenseNumber }}" 
+                                 data-inputmask="'mask': '*****-***-***-***'">
+                      </div>
+                  </div>            
+                  <div class="row-sm-4">                    
+                      <div class="form-group">
+                          <label>License keys</label>
+                          <input type="text" class="form-control" placeholder="License keys" name="licenseKeys" 
+                                 value="{{ computer.windowses.first.licenseKeys }}" 
+                                 data-inputmask="'mask': '*****-*****-*****-*****-*****'">
+                      </div>
+                  </div>         
               </div>
-              
+
 
               <div class="col-sm-4">
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Database type</label>
-                    <select class="form-control select2bs4" name="typeDB" disabled="disabled" style="width: 100%;">
-                      {% for typeDB in data.typeDB %}
-                        <option value="{{ typeDB.type }}">{{ typeDB.type }}</option>
-                      {% endfor %}
-                    </select>
+                    <input list="typeDBList" id="typeDBsInput" name="typeDB" class="form-control" 
+                          value="{{ computer.typeDB.first.type }}" placeholder="Type database" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="typeDBList">
+                        {% for typeDB in typeDBs %}
+                          <option value="{{ typeDB.type }}">
+                        {% endfor %}       
+                      </datalist>
+
+                   
                   </div>
                 </div>
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Database version</label>
-                    {% for typeDB in data.typeDB %}
-                        <input type="text" class="form-control" placeholder="Database version" name="versionDB" value="{{ typeDB.version }}" disabled>                   
-                    {% endfor %}
+                   
+                        <input type="text" class="form-control" placeholder="Database version" name="versionDB" value="{{ computer.typeDB.first.version }}" >                   
+                 
                   </div>
                 </div>
               </div>
@@ -472,7 +496,7 @@ function handleKeyPress(event) {
                 <div class="form-group">
                   <label>Additional software</label>
                   
-                  <textarea class="form-control" rows="3" placeholder="Add a software" disabled>{{ computer.addSoftware }}</textarea>
+                  <textarea class="form-control" rows="3" placeholder="Add a software" >{{ computer.addSoftware }}</textarea>
                 </div>
               </div>                
             </div>
@@ -482,7 +506,7 @@ function handleKeyPress(event) {
 
 <!-- ADDITIONAL DEVICES BLOCK-->    
  
-    {% if data.monitor or data.diskPlace or computer.addDevices %}
+    {% if monitors or diskPlaces or computer.addDevices %}
             <div class="col-12">
               <h4>Additional devices</h4>
             </div>
@@ -492,16 +516,19 @@ function handleKeyPress(event) {
               <div class="col-sm-4">
                   <div class="form-group">
                       <label>Monitor</label>
-                      <select class="form-control select2bs4" name="MonitorName" disabled="disabled" style="width: 100%;">
-                          {% for monitor in data.monitor %}
+                      <input list="monitorList" id="monitorInput" name="MonitorName" class="form-control" 
+       value="{{ computer.monitor.first.name }}" placeholder="Select monitor" style="width: 100%" >
+                      <datalist id="monitorList">
+                          {% for monitor in monitors %}
                               {% if monitor.name %}
-                                  <option value="{{ monitor.name }}">{{ monitor.name }}</option>
+                                  <option value="{{ monitor.name }}">
                               {% endif %}
                               {% if monitor.custom_name %}
-                                  <option value="{{ monitor.custom_name }}">{{ monitor.custom_name }}</option>
+                                  <option value="{{ monitor.custom_name }}">
                               {% endif %}
                           {% endfor %}
-                      </select>
+                      </datalist>
+
                   </div>
               </div>
           
@@ -512,11 +539,11 @@ function handleKeyPress(event) {
                 
                   <div class="form-group">
                     <label>DVD / CD</label>
-                    <select class="form-control select2bs4" name="DiskPlace" disabled="disabled" style="width: 100%;">
-                      {% for diskPlace in data.diskPlace %}
-                        <option value="{{ diskPlace.name }}">{{ diskPlace.name }}</option>
-                      {% endfor %}
-                    </select>
+                    <input type="text" class="form-control" placeholder="DVD / CD" name="diskPlace" 
+                                 value="{{ computer.diskPlace.first.name }}" 
+                                 >
+
+                   
                   </div>
                 
               </div>
@@ -525,7 +552,7 @@ function handleKeyPress(event) {
               <div class="col-sm-4">
                 <div class="form-group">
                   <label>Additional devices</label>
-                  <textarea class="form-control" rows="3" placeholder="Add a devices" disabled>{{ computer.addDevices }}</textarea>
+                  <textarea class="form-control" rows="3" placeholder="Add a devices" >{{ computer.addDevices }}</textarea>
                 </div>
               </div>                
             </div>
@@ -533,19 +560,22 @@ function handleKeyPress(event) {
     {% endif %}         
                 
  <!-- ADDITIONAL SETTINGS BLOCK--> 
-    {% if data.addSetting %}             
-              <div class="row">               
+    {% if addSettings %}             
+              <div class="row add-settings">               
                 <div class="col-sm-4">
                   
                     <div class="form-group">
                       <label>Additional settings</label>
-                      {% for addSetting in data.addSetting %}
-                          <div class="mb-3">
-                              <select class="form-control select2bs4" name="addSettings" disabled="disabled" style="width: 100%;">
-                                  <option value="{{ addSetting.name }}">{{ addSetting.name }}</option>
-                              </select>
-                          </div>
-                      {% endfor %}
+                      <input list="addSettingList" id="addSettingsInput" name="addSetting" class="form-control" 
+                          value="{{ computer.addSettings.first.name }}" placeholder="Additional settings" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="addSettingList">
+                        {% for addSetting in addSettings %}
+                          <option value="{{ addSetting.name }}">
+                        {% endfor %}       
+                      </datalist>
+
+                      
                     </div>
                   
                 </div>
@@ -555,14 +585,18 @@ function handleKeyPress(event) {
                   
                     <div class="form-group">
                       <label>Additional settings</label>
-                      {% for addSetting in data.addSetting %}
-                        <input type="text" class="form-control mb-3" placeholder="Additional settings" name="addSettingsText" value="{{ addSetting.text }}" disabled>                   
-                      {% endfor %}
+                      
+                        <input type="text" class="form-control mb-3" placeholder="Additional settings" name="addSettingsText" value="{{ computer.addSettings.first.text }}">                   
+                    
                     </div>
                   
                 </div>
               </div>
     {% endif %}
+    <div class="row">
+      <button type="button" id="addSettingsBtn" class="btn btn-primary">Add settings</button>
+    </div>
+    <div class="mt-3 col-md-12">
 
 
                 
@@ -590,7 +624,7 @@ function handleKeyPress(event) {
                     
                     <div class="form-group">
                       <label>Employee</label>
-                      <select class="form-control select2bs4" name="Employee" disabled="disabled" style="width: 100%;">
+                      <select class="form-control select" name="Employee" style="width: 100%;">
                           {% for employee in employees %}
                               <option value="{{ employee.id }}" {% if employee.id == computer.employee.id %}selected{% endif %}>
                                   {{ employee.name }}
@@ -650,7 +684,25 @@ function handleKeyPress(event) {
             </script>
 
 
-
+            <script>
+              $(document).ready(function() {
+                  $('#saveButton').click(function() {
+                      let formData = $('#editComputerForm').serialize();
+                      
+                      $.ajax({
+                          url: '{% url "computer_edit" computer.id %}',  // URL представления для обработки формы
+                          type: 'POST',
+                          data: formData,
+                          success: function(response) {
+                              alert('Data saved successfully!');
+                          },
+                          error: function(xhr, status, error) {
+                              alert('An error occurred: ' + xhr.responseText);
+                          }
+                      });
+                  });
+              });
+          </script>
 
            
 

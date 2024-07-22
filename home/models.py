@@ -62,7 +62,7 @@ class Computer(models.Model):
     addComment = models.TextField(null=True, blank=True)
     addSettings = models.ManyToManyField('AdditionalSettings', blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
-    windows = models.ManyToManyField('Windows', blank = False)
+    
     
 
 
@@ -162,6 +162,7 @@ class AdditionalSettings(models.Model):
         return f'{self.name} - {self.text}'
     
 class Windows(models.Model):
+    computer = models.ForeignKey(Computer, on_delete=models.CASCADE, related_name='windowses')
     name = models.CharField(max_length=30)
     licenseNumber = models.CharField(max_length=60)
     licenseKeys = models.CharField(max_length=60)
