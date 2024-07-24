@@ -13,6 +13,60 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.7-beta.22/jquery.inputmask.min.js"></script>
 
 
+<script>
+  function addNew(inputId, listId) {
+    var input = document.getElementById(inputId);
+    var datalist = document.getElementById(listId);
+    var newValue = input.value;
+
+    var exists = false;
+    for (var i = 0; i < datalist.options.length; i++) {
+      if (datalist.options[i].value == newValue) {
+        exists = true;
+        break;
+      }
+    }
+
+    if (!exists && newValue !== '') {
+      var newOption = document.createElement('option');
+      newOption.value = newValue;
+      datalist.appendChild(newOption);
+    }
+  }
+
+  function handleKeyPress(event, inputId, listId) {
+    if (event.key == 'Enter') {
+      event.preventDefault();
+      addNew(inputId, listId);
+    }
+  }
+</script>
+
+<script>
+  $(document).ready(function(){
+      $('#addUserBtn').click(function(){
+          var newUserRow = $('.user-row:first').clone();
+          newUserRow.find('input').val('');
+          newUserRow.find('select').val('');
+          newUserRow.insertAfter('.user-row:last');
+      });
+    });
+
+      
+</script>
+<script>
+  $(document).ready(function(){
+      $('#addSettingsBtn').click(function(){
+        var newSettingsRow = $('.add-settings:first').clone();
+        newSettingsRow.find('input').val('');
+        newSettingsRow.find('select').val('');
+        newSettingsRow.insertAfter('.add-settings:last');
+      });
+    });
+
+</script>
+
+
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -21,12 +75,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Computer detail</h1>
+            <h1>Computer edit</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Computer detail</li>
+              <li class="breadcrumb-item"><a href="#">Computer detail</a></li>
+              <li class="breadcrumb-item active">Computer edit</li>
             </ol>
           </div>
         </div>
@@ -64,8 +118,8 @@
           </div>
           
               <div style="margin-right: 10px;"></div>
-              <div class="ml-auto"> <!-- Кнопка "Edit" выравнивается справа -->
-                <a href="{% url 'edit' computer_id=computer.id %}" class="btn btn-primary">Edit</a>
+              <div class="ml-auto"> <!-- Кнопка выравнивается справа -->
+                <button type="submit" class="btn btn-primary">Save</button>
               </div>
 
           </div>
@@ -79,7 +133,7 @@
         
           <!-- /.card-header -->
           <div class="card-body">
-            <form method="POST" action="{% url 'computer_detail' computer.id %}" id="computer-form">
+            <form method="POST" action="{% url 'edit' computer_id=computer.id %}">
               {% csrf_token %}
               
 
@@ -88,36 +142,43 @@
                   <!-- textarea -->
                   <div class="form-group">
                     <label>Customer name</label>
-                    <select class="form-control select2bs4" name="Customer" disabled="disabled" style="width: 100%;">
-                      {% for customer in customers %}
-                          <option value="{{ customer.id }}" {% if customer.id == computer.customer.id %}selected{% endif %}>
-                              {{ customer.name }}
-                          </option>
-                      {% endfor %}
-                  </select>
-                    
+                    <input list="customerList" id="customerInput" name="customer_name" class="form-control" value="{{ form.customer_name.value }}" placeholder="Customer name" style="width: 100%">
+                    <datalist id="customerList">
+                        {% for customer in customer_queryset %}
+                        <option value="{{ customer.name }}">
+                        {% endfor %}
+                    </datalist>
+                    {{ form.customer_name.errors }}
+                                
                   </div>
                 </div>
                 <div class="col-sm-4">
                   <div class="form-group">
                     <label>Placement</label>
-                    <select class="form-control select2bs4" name="Placement" disabled="disabled" style="width: 100%;">
-                      {% for location in data.locations %}
-                          <option value="{{ location.name }}">{{ location.name }}</option>                      
-                      {% endfor %}
-                    </select>
+                    <input list="locationList" id="locationInput" name="Location" class="form-control" 
+                          value="{{ form.location_name.value }}" placeholder="Placement" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                    <datalist id="locationList">
+                      {% for location in location_queryset %}
+                      <option value="{{ location.name }}">
+                      {% endfor %}       
+                    </datalist>
+                    
+            
                   </div>
                 </div>
                 <div class="col-sm-4">
                   <div class="form-group">
-                      <label>Computer type</label>
-                      <select class="form-control select2bs4" name="Placement" disabled="disabled" style="width: 100%;">
-                          {% if data.custom_type %}
-                              <option value="{{ data.custom_type }}">{{ data.custom_type }}</option>
-                          {% else %}
-                              <option value="{{ data.type }}">{{ data.type }}</option>
-                          {% endif %}
-                      </select>
+                    <label>Computer type</label>
+                    <input list="computerTypeList" id="computerTypeInput" name="ComputerType" class="form-control" 
+                          value="{{ form.computer_type.value }}" 
+                          placeholder="Computer type" style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                    <datalist id="computerTypeList">
+                        {% for choice in type_choices %}
+                            <option value="{{ choice }}">{{ choice }}</option>
+                        {% endfor %}
+                    </datalist>
+                    {{ form.computer_type.errors }}
                   </div>
               </div>
               
@@ -129,68 +190,82 @@
                 <h4>Main Information</h4>
               </div>
               
-              <div class="col-sm-8">   
-                <div class="row">
-                  <div class="col-sm-6">
-                      <div class="form-group">
-                          <label>Computer name</label>
-                          <input type="text" class="form-control" placeholder="Name" name="computer_name" value="{{ computer.name }}" disabled>
-                      </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="form-group">
-                      <label>Computer series number</label>
-                      <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" disabled>
-                    </div>
-                  </div>
-                </div>
-          
-                
-                <div class="row">
-                  {% if data.user %}
-                      {% for user in data.user %}
-                          <div class="col-sm-2">
-                              <div class="form-group">
-                                  <label>User type</label>
-                                  <select class="form-control select" name="UserType" style="width: 100%;" disabled>   
-                                      <option value="{{ user.user_type }}">{{ user.user_type }}</option>   
-                                  </select>
-                              </div>
-                          </div>
-                          <div class="col-sm-4">
-                              <div class="form-group">
-                                  <label>User name</label>
-                                  <input type="text" class="form-control" placeholder="User name" value="{{ user.login }}" disabled>
-                              </div>
-                          </div>
-                          <div class="col-sm-6">
-                              <div class="form-group">
-                                  <label>User password</label>
-                                  <input type="text" class="form-control"  placeholder="User password" value="{{ user.password }}" disabled>
-                              </div>
-                          </div>
-                      {% endfor %}
-                  {% endif %}
-              </div>
-              
-              
-              
-          
+  <div class="col-sm-8">   
+      <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Computer name</label>
+                <input type="text" class="form-control" placeholder="Name" name="computer_name" value="{{ computer.name }}">
+            </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Computer series number</label>
+            <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" >
+          </div>
+        </div>
+      </div>
+
+
+      {% if users %}
+      {% for user in users %}
+      <div class="row user-row">
+
+                <div class="col-sm-2">
+                  <div class="form-group">
+                    <label>User type</label>
+
+                    <input list="userList" id="usersInput_{{ user.pk }}" name="user_type_{{ user.pk }}" class="form-control" 
+                       value="{{ user.user_type }}" placeholder="User type" 
+                       style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                    <datalist id="userList">
+                        {% for choice in user_types %}
+                            <option value="{{ choice }}">
+                        {% endfor %}       
+                    </datalist>
                  
                 </div>
-          
-          
-          
-                  <div class="col-sm-4">
-                      <div class="form-group">
-                          <label>Comment</label>
-                          
-                          <textarea class="form-control" rows="3" placeholder="Add a comment" disabled>{{ computer.addComment }}</textarea>
-                      </div>
-                  </div>
+                
                 </div>
-              
-              
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label>User name</label>
+                        <input type="text" class="form-control" name="user_name_{{ user.pk }}" placeholder="User name" value="{{ user.login }}">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group">
+                      <label>User password</label>
+                      <input type="text" class="form-control" name="password_{{ user.pk }}" placeholder="User password" value="{{ user.password }}">
+                  </div>
+              </div>
+  
+      </div>
+      {% endfor %}
+      {% endif %}
+    
+    
+
+        <div class="row">
+          <button type="button" id="addUserBtn" class="btn btn-primary">Add user</button>
+        </div>
+      </div>
+
+
+
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label>Comment</label>
+                
+                <textarea class="form-control" rows="3" placeholder="Add a comment" >{{ form.addComment_value.value }}</textarea>
+            </div>
+        </div>
+    </div>
+    <div class="mt-3 col-md-12">
+      
+    </div>
+
+    
 
 
 
@@ -211,22 +286,32 @@
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>Processor</label>
-                      <select class="form-control select2bs4" name="Processor" disabled="disabled" style="width: 100%;">
-                      {% for processor in data.processor %}
-                          <option value="{{ processor.name }}">{{ processor.name }}</option>                      
-                      {% endfor %}
-                    </select>
+                      <input list="processorList" id="processorsInput" name="Processor" class="form-control" 
+                          value="{{ form.processor_name.value }}" placeholder="Processor" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="processorList">
+                        {% for processor in processor_queryset %}
+                          <option value="{{ processor.name }}">
+                        {% endfor %}       
+                      </datalist>
+
                      </div>
                   </div>
                   <div class="row-sm-4">                    
                     <div class="form-group">
                       <label>Video card</label>
-                      <select class="form-control select2bs4" name="videoCard" disabled="disabled" style="width: 100%;">
-                      {% for videoCard in data.videoCard %}                         
-                          <option value="{{ videoCard.name }}">{{ videoCard.name }}</option>
-                          
-                      {% endfor %}
-                    </select>
+
+                      <input list="videoCardList" id="videoCardsInput" name="videoCard" class="form-control" 
+                          value="{{ form.videoCard_name.value }}" placeholder="Video card" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="videoCardList">
+                        {% for videoCard in videoCard_queryset %}
+                          <option value="{{ videoCard.name }}">
+                        {% endfor %}       
+                      </datalist>
+
+
+                     
                     </div>
                   </div>                   
                 </div>
@@ -236,20 +321,27 @@
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>LAN card</label>
-                      <select class="form-control select2bs4" name="lanCard" disabled="disabled" style="width: 100%;">
-                        {% for lanCard in data.lanCard %}
-                            <option value="{{ lanCard.type }}">{{ lanCard.type }}</option>
-                        {% endfor %}
-                    </select>
+
+                      <input list="lanCardList" id="lanCardsInput" name="lanCard" class="form-control" 
+                          value="{{ form.lanCard_name.value }}" placeholder="LAN card" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="lanCardList">
+                        {% for lanCard in lanCard_queryset %}
+                          <option value="{{ lanCard.type }}">
+                        {% endfor %}       
+                      </datalist>
+
+
+                      
                   </div>
                   
                   </div>
                   <div class="row-sm-4">
                     <div class="form-group">
                       <label>LAN card series</label>
-                      {% for lanCard in data.lanCard %}
-                        <input type="text" class="form-control" placeholder="LAN series" name="lanSeries" value="{{ lanCard.series }}" disabled>                   
-                      {% endfor %}
+                      <input type="text" class="form-control" placeholder="LAN series" name="lanSeries" 
+                      value="{{ form.lanCard_series.value }}">
+                      
                       </div>
                   </div>
                 </div>
@@ -260,19 +352,30 @@
                     <div class="col-sm-3">
                       <div class="form-group">
                         <label>RAM GB</label>
-                        <select class="form-control select2bs4" name="ramGB" disabled="disabled" style="width: 100%;">
-                          {% for ram in data.ram %}
-                            <option value="{{ ram.gigabytes }}">{{ ram.gigabytes }}</option>
-                          {% endfor %}
-                        </select>
+                        <select class="form-control select" name="Ram" style="width: 100%;">   
+                          {% for ram in ram_queryset %}                
+                          <option value="{{ ram.gigabytes }}">{{ ram.gigabytes }}</option>   
+                          {% endfor %}               
+                        </select> 
+
+                       
                       </div>
                     </div>
                     <div class="col-sm-9">
                       <div class="form-group">
                         <label>RAM type</label>
-                        {% for ram in data.ram %}
-                        <input type="text" class="form-control" placeholder="RAM type" name="ramType" value="{{ ram.type }}" disabled>                   
-                        {% endfor %}
+
+                        <input list="ramList" id="ramsInput" name="ram" class="form-control" 
+                          value="{{ form.ram_type.value }}" placeholder="RAM type" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="ramList">
+                        {% for ram in ram_queryset %}
+                          <option value="{{ ram.type }}">
+                        {% endfor %}       
+                      </datalist>
+
+
+                        
                       </div>
                     </div>
                   </div>
@@ -280,8 +383,8 @@
                     <div class="col-sm-3">
                       <div class="form-group">
                         <label>Disk GB</label>
-                        <select class="form-control select2bs4" name="diskGB" disabled="disabled" style="width: 100%;">
-                          {% for hardDisk in data.hardDisk %}
+                        <select class="form-control select" name="diskGB" style="width: 100%;">
+                          {% for hardDisk in hardDisk_queryset %}
                             <option value="{{ hardDisk.gigabytes }}">{{ hardDisk.gigabytes }}</option>
                           {% endfor %}
                         </select>
@@ -290,9 +393,18 @@
                     <div class="col-sm-9">
                       <div class="form-group">
                         <label>Hard disk type</label>
-                        {% for hardDisk in data.hardDisk %}
-                        <input type="text" class="form-control" placeholder="Hard Disk type" name="hardDiskType" value="{{ hardDisk.type }}" disabled>                   
-                        {% endfor %}
+
+                        <input list="hardDiskList" id="hardDisksInput" name="hardDisk" class="form-control" 
+                          value="{{ form.hardDisk_type.value }}" placeholder="Hard disk type" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="hardDiskList">
+                        {% for hardDisk in hardDisk_queryset %}
+                          <option value="{{ hardDisk.type }}">
+                        {% endfor %}       
+                      </datalist>
+
+
+                        
                       </div>
                     </div>
                   </div>
@@ -310,52 +422,62 @@
 
             <div class="row">               
               <div class="col-sm-4">
-                <div class="row-sm-4">
-                  <div class="form-group">
-                    <label>Windows</label>
-                    <select class="form-control select2bs4" name="windowsName" disabled="disabled" style="width: 100%;">
-                      {% for windows in data.windows %}
-                        <option value="{{ windows.name }}">{{ windows.name }}</option>
-                      {% endfor %}
-                    </select>
+                  <div class="row-sm-4">
+                      <div class="form-group">
+                          <label>Windows</label>
+
+                          <input list="windowsList" id="windowsInput" name="Windows" class="form-control" 
+                          value="{{ form.windows_name.value }}" placeholder="Windows" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                          <datalist id="windowsList">
+                            {% for windows in windows_queryset %}
+                            <option value="{{ windows.name }}">
+                            {% endfor %}       
+                          </datalist>
+ 
+                      </div>
                   </div>
-                </div>
-                <div class="row-sm-4">                    
-                  <div class="form-group">
-                    <label>License number</label>
-                    {% for windows in data.windows %}
-                        <input type="text" class="form-control" placeholder="License number" name="licenseNumber" value="{{ windows.licenseNumber }}" data-inputmask="'mask': '*****-***-***-***'" disabled>                   
-                    {% endfor %}
-                  </div>
-                </div>            
-                <div class="row-sm-4">                    
-                  <div class="form-group">
-                    <label>License keys</label>
-                    {% for windows in data.windows %}
-                        <input type="text" class="form-control" placeholder="License keys" name="licenseKeys" value="{{ windows.licenseKeys }}" data-inputmask="'mask': '*****-*****-*****-*****-*****'" disabled>                   
-                    {% endfor %}
-                  </div>
-                </div>         
+                  <div class="row-sm-4">                    
+                      <div class="form-group">
+                          <label>License number</label>
+                          <input type="text" class="form-control" placeholder="License number" name="licenseNumber" 
+                                 value="{{ form.windows_licenseNumber.value }}" 
+                                 data-inputmask="'mask': '*****-***-***-***'">
+                      </div>
+                  </div>            
+                  <div class="row-sm-4">                    
+                      <div class="form-group">
+                          <label>License keys</label>
+                          <input type="text" class="form-control" placeholder="License keys" name="licenseKeys" 
+                                 value="{{ form.windows_licenseKeys.value }}" 
+                                 data-inputmask="'mask': '*****-*****-*****-*****-*****'">
+                      </div>
+                  </div>         
               </div>
-              
+
 
               <div class="col-sm-4">
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Database type</label>
-                    <select class="form-control select2bs4" name="typeDB" disabled="disabled" style="width: 100%;">
-                      {% for typeDB in data.typeDB %}
-                        <option value="{{ typeDB.type }}">{{ typeDB.type }}</option>
-                      {% endfor %}
-                    </select>
+                    <input list="typeDBList" id="typeDBsInput" name="typeDB" class="form-control" 
+                          value="{{ form.typeDB_type.value }}" placeholder="Type database" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="typeDBList">
+                        {% for typeDB in typeDB_queryset %}
+                          <option value="{{ typeDB.type }}">
+                        {% endfor %}       
+                      </datalist>
+
+                   
                   </div>
                 </div>
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Database version</label>
-                    {% for typeDB in data.typeDB %}
-                        <input type="text" class="form-control" placeholder="Database version" name="versionDB" value="{{ typeDB.version }}" disabled>                   
-                    {% endfor %}
+                   
+                        <input type="text" class="form-control" placeholder="Database version" name="versionDB" value="{{ form.typeDB_version.value }}" >                   
+                 
                   </div>
                 </div>
               </div>
@@ -365,7 +487,7 @@
                 <div class="form-group">
                   <label>Additional software</label>
                   
-                  <textarea class="form-control" rows="3" placeholder="Add a software" disabled>{{ computer.addSoftware }}</textarea>
+                  <textarea class="form-control" rows="3" placeholder="Add a software" >{{ form.addSoftware_value.value }}</textarea>
                 </div>
               </div>                
             </div>
@@ -375,7 +497,7 @@
 
 <!-- ADDITIONAL DEVICES BLOCK-->    
  
-    {% if data.monitor or data.diskPlace or computer.addDevices %}
+    {% if monitor_queryset or diskPlace_queryset or form.addDevices_value %}
             <div class="col-12">
               <h4>Additional devices</h4>
             </div>
@@ -385,16 +507,19 @@
               <div class="col-sm-4">
                   <div class="form-group">
                       <label>Monitor</label>
-                      <select class="form-control select2bs4" name="MonitorName" disabled="disabled" style="width: 100%;">
-                          {% for monitor in data.monitor %}
+                      <input list="monitorList" id="monitorInput" name="MonitorName" class="form-control" 
+                      value="{{ form.monitor_name.value }}" placeholder="Select monitor" style="width: 100%" >
+                      <datalist id="monitorList">
+                          {% for monitor in monitor_queryset %}
                               {% if monitor.name %}
-                                  <option value="{{ monitor.name }}">{{ monitor.name }}</option>
+                                  <option value="{{ monitor.name }}">
                               {% endif %}
                               {% if monitor.custom_name %}
-                                  <option value="{{ monitor.custom_name }}">{{ monitor.custom_name }}</option>
+                                  <option value="{{ monitor.custom_name }}">
                               {% endif %}
                           {% endfor %}
-                      </select>
+                      </datalist>
+
                   </div>
               </div>
           
@@ -405,11 +530,11 @@
                 
                   <div class="form-group">
                     <label>DVD / CD</label>
-                    <select class="form-control select2bs4" name="DiskPlace" disabled="disabled" style="width: 100%;">
-                      {% for diskPlace in data.diskPlace %}
-                        <option value="{{ diskPlace.name }}">{{ diskPlace.name }}</option>
-                      {% endfor %}
-                    </select>
+                    <input type="text" class="form-control" placeholder="DVD / CD" name="diskPlace" 
+                                 value="{{ form.diskPlace_name.value }}" 
+                                 >
+
+                   
                   </div>
                 
               </div>
@@ -418,7 +543,7 @@
               <div class="col-sm-4">
                 <div class="form-group">
                   <label>Additional devices</label>
-                  <textarea class="form-control" rows="3" placeholder="Add a devices" disabled>{{ computer.addDevices }}</textarea>
+                  <textarea class="form-control" rows="3" placeholder="Add a devices" >{{ form.addDevices_value.value }}</textarea>
                 </div>
               </div>                
             </div>
@@ -426,19 +551,22 @@
     {% endif %}         
                 
  <!-- ADDITIONAL SETTINGS BLOCK--> 
-    {% if data.addSetting %}             
-              <div class="row">               
+    {% if addSettings %}             
+              <div class="row add-settings">               
                 <div class="col-sm-4">
                   
                     <div class="form-group">
                       <label>Additional settings</label>
-                      {% for addSetting in data.addSetting %}
-                          <div class="mb-3">
-                              <select class="form-control select2bs4" name="addSettings" disabled="disabled" style="width: 100%;">
-                                  <option value="{{ addSetting.name }}">{{ addSetting.name }}</option>
-                              </select>
-                          </div>
-                      {% endfor %}
+                      <input list="addSettingList" id="addSettingsInput" name="addSetting" class="form-control" 
+                          value="{{ computer.addSettings.first.name }}" placeholder="Additional settings" 
+                          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                      <datalist id="addSettingList">
+                        {% for addSetting in addSettings %}
+                          <option value="{{ addSetting.name }}">
+                        {% endfor %}       
+                      </datalist>
+
+                      
                     </div>
                   
                 </div>
@@ -448,14 +576,18 @@
                   
                     <div class="form-group">
                       <label>Additional settings</label>
-                      {% for addSetting in data.addSetting %}
-                        <input type="text" class="form-control mb-3" placeholder="Additional settings" name="addSettingsText" value="{{ addSetting.text }}" disabled>                   
-                      {% endfor %}
+                      
+                        <input type="text" class="form-control mb-3" placeholder="Additional settings" name="addSettingsText" value="{{ computer.addSettings.first.text }}">                   
+                    
                     </div>
                   
                 </div>
               </div>
     {% endif %}
+    <div class="row">
+      <button type="button" id="addSettingsBtn" class="btn btn-primary">Add settings</button>
+    </div>
+    <div class="mt-3 col-md-12">
 
 
                 
@@ -483,7 +615,7 @@
                     
                     <div class="form-group">
                       <label>Employee</label>
-                      <select class="form-control select2bs4" name="Employee" disabled="disabled" style="width: 100%;">
+                      <select class="form-control select" name="Employee" style="width: 100%;">
                           {% for employee in employees %}
                               <option value="{{ employee.id }}" {% if employee.id == computer.employee.id %}selected{% endif %}>
                                   {{ employee.name }}
@@ -493,8 +625,12 @@
                   </div>
                     
                   </div>
-                </div>                            
-              </div>            
+                </div>
+                <footer class="main-footer">
+                
+                </footer>                             
+              </div>  
+                       
             </form>
 
 
@@ -533,46 +669,31 @@
                 // Инициализация Inputmask
                 $(":input").inputmask();
               });
-
-              document.getElementById('addUserBtn').addEventListener('click', function() {
-                let container = document.getElementById('userContainer');
-                let userFields = `
-                  <div class="row">
-                    <div class="col-sm-6">
-                      <div class="form-group">
-                        <label>User type</label>
-                        <select class="form-control select2bs4" style="width: 100%;" name="user_type[]">
-                          {% for user_type, user_type_display in UserName.USER_TYPES %}
-                            <option value="{{ user_type }}">{{ user_type_display }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    </div>
-                    <div class="col-sm-6">
-                      <div class="form-group">
-                        <label>User name</label>
-                        <select class="form-control" name="user_name[]">
-                          {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.login }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row-sm-4">
-                    <div class="form-group">
-                      <label>User password</label>
-                      <input type="text" class="form-control" placeholder="Password" name="user_password[]">
-                    </div>
-                  </div>
-                `;
-                container.insertAdjacentHTML('beforeend', userFields);
-              });
+              
+            
 
             </script>
 
 
-
+            <script>
+              $(document).ready(function() {
+                  $('#saveButton').click(function() {
+                      let formData = $('#editComputerForm').serialize();
+                      
+                      $.ajax({
+                          url: '{% url "edit" computer.id %}',  // URL представления для обработки формы
+                          type: 'POST',
+                          data: formData,
+                          success: function(response) {
+                              alert('Data saved successfully!');
+                          },
+                          error: function(xhr, status, error) {
+                              alert('An error occurred: ' + xhr.responseText);
+                          }
+                      });
+                  });
+              });
+          </script>
 
            
 

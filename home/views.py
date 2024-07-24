@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Computer, Order_Computer, Customer, Location, UserName, Employee, Processor, VideoCard, LANcard, RAM, HardDisk, Windows, TypeDB, Monitor, DiskPlace, AdditionalSettings
 from django.db.models import Q
 import json
+from .forms import ComputerForm
 
 
 # Create your views here.
@@ -84,144 +85,153 @@ def computer_edit(request, computer_id):
     computer = get_object_or_404(Computer, pk=computer_id)
 
     if request.method == 'POST':
-        # Обработка POST-запроса для сохранения изменений
-        computer.name = request.POST.get('name')
-        computer.status = request.POST.get('status')
-        computer.serial_number = request.POST.get('serial_number')
-        computer.type = request.POST.get('type') if not request.POST.get('custom_type') else None
-        computer.custom_type = request.POST.get('custom_type')
+        form = ComputerForm(request.POST, instance=computer)
+        if form.is_valid():
+            form.save()
+
+            # Обработка POST-запроса для сохранения изменений
+            computer.name = request.POST.get('name')
+            computer.status = request.POST.get('status')
+            computer.serial_number = request.POST.get('serial_number')
+            computer.type = request.POST.get('type') if not request.POST.get('custom_type') else None
+            computer.custom_type = request.POST.get('custom_type')
+            
+            
+            computer.hardDisk = request.POST.get('hardDisk')
+            computer.diskPlace = request.POST.get('diskPlace')
+            
+            
+            
+            
+            
+            
+            computer.addDevices = request.POST.get('addDevices')
+            computer.addComment = request.POST.get('addComment')
+            computer.date = request.POST.get('date')
+
         
-        
-        computer.hardDisk = request.POST.get('hardDisk')
-        computer.diskPlace = request.POST.get('diskPlace')
-        
-        
-        
-        
-        
-        
-        computer.addDevices = request.POST.get('addDevices')
-        computer.addComment = request.POST.get('addComment')
-        computer.date = request.POST.get('date')
+            
 
-       
-        
-
-        
-       
-
-        # Для связанных объектов обработка может быть сложнее, в зависимости от того, как у вас настроены модели.
-        # Вы должны убедиться, что связанные объекты существуют или создать их.
-        
-        # Пример:
-        # Если ваши связанные поля являются ForeignKey или ManyToManyField, нужно обрабатывать их отдельно.
-        customer = request.POST.get('customer')
-        if customer:
-           computer.customer = get_object_or_404(Customer, pk=customer)
-
-        employee = request.POST.get('employee')
-        if employee:
-           computer.employee = get_object_or_404(Employee, pk=employee)
-
-        location_name = request.POST.get('Location')
-        if location_name:
-            location, created = Location.objects.get_or_create(name=location_name, computer=computer)
-            computer.locations.clear()
-            computer.locations.add(location)
-
-        user = request.POST.get('user')
-        if user:
-            # Assuming `user` is a ManyToManyField or ForeignKey, handle it appropriately
-            computer.user.clear()
-            user_ids = user.split(',')  # Assuming user ids are sent as a comma-separated string
-            for user_id in user_ids:
-                user_instance = get_object_or_404(UserName, pk=user_id)
-                computer.user.add(user_instance)
-
-
-        processors = request.POST.getlist('processor')
-        if processors:
-            computer.processor.clear()
-            for processor in processors:
-                processor_instance = get_object_or_404(Processor, pk=processor)
-                computer.processor.add(processor_instance)
-
-        videoCards = request.POST.getlist('videoCard')
-        if videoCards:
-            computer.videoCard.clear()
-            for videoCard in videoCards:
-                videoCard_instance = get_object_or_404(VideoCard, pk=videoCard)
-                computer.videoCard.add(videoCard_instance)
-
-        lanCards = request.POST.getlist('lanCard')
-        if videoCards:
-            computer.lanCard.clear()
-            for lanCard in lanCards:
-                lanCard_instance = get_object_or_404(LANcard, pk=lanCard)
-                computer.lanCard.add(lanCard_instance)
-
-        rams = request.POST.get('ram')
-        if rams:
-            computer.ram.clear()
-            for ram in rams:
-                ram_instance = get_object_or_404(RAM, pk=ram)
-                computer.ram.add(ram_instance)
-       
-
-        hardDisks = request.POST.get('hardDisk')
-        if hardDisks:
-            computer.hardDisk.clear()
-            for hardDisk in hardDisks:
-                hardDisk_instance = get_object_or_404(HardDisk, pk=hardDisk)
-                computer.hardDisk.add(hardDisk_instance)
-
-        user = request.POST.get('user')
-        if user:
-            # Assuming `user` is a ManyToManyField or ForeignKey, handle it appropriately
-            computer.user.clear()
-            user_ids = user.split(',')  # Assuming user ids are sent as a comma-separated string
-            for user_id in user_ids:
-                user_instance = get_object_or_404(UserName, pk=user_id)
-                computer.user.add(user_instance)
-
-        windowses = request.POST.getlist('windows')
-        if windowses:
-            computer.windows.clear()
-            for windows in windowses:
-                windows_instance = get_object_or_404(Windows, pk=windows)
-                computer.windows.add(windows_instance)
-
-        typeDBs = request.POST.get('typeDB')
-        if typeDBs:
-            computer.typeDB.clear()
-            for typeDB in typeDBs:
-                typeDB_instance = get_object_or_404(TypeDB, pk=typeDB)
-                computer.typeDB.add(typeDB_instance)
-
-
-        monitors = request.POST.get('monitor')
-        if monitors:
-            computer.monitor.clear()
-            for monitor in monitors:
-                monitor_instance = get_object_or_404(Monitor, pk=monitor)
-                computer.monitor.add(monitor_instance)
+            
         
 
-        addSettings = request.POST.get('addSetting')
-        if addSettings:
-            computer.addSetting.clear()
-            for addSetting in addSettings:
-                addSetting_instance = get_object_or_404(AdditionalSettings, pk=addSetting)
-                computer.addSetting.add(addSetting_instance)
+            # Для связанных объектов обработка может быть сложнее, в зависимости от того, как у вас настроены модели.
+            # Вы должны убедиться, что связанные объекты существуют или создать их.
+            
+            # Пример:
+            # Если ваши связанные поля являются ForeignKey или ManyToManyField, нужно обрабатывать их отдельно.
+            customer = request.POST.get('customer')
+            if customer:
+                computer.customer = get_object_or_404(Customer, pk=customer)
 
-        computer.save()
-        return JsonResponse({'message': 'Success'})
+                employee = request.POST.get('employee')
+            if employee:
+                computer.employee = get_object_or_404(Employee, pk=employee)
+
+            location_name = request.POST.get('Location')
+            if location_name:
+                location, created = Location.objects.get_or_create(name=location_name, computer=computer)
+                computer.locations.clear()
+                computer.locations.add(location)
+
+            user = request.POST.get('user')
+            if user:
+                # Assuming `user` is a ManyToManyField or ForeignKey, handle it appropriately
+                computer.user.clear()
+                user_ids = user.split(',')  # Assuming user ids are sent as a comma-separated string
+                for user_id in user_ids:
+                    user_instance = get_object_or_404(UserName, pk=user_id)
+                    computer.user.add(user_instance)
+
+
+            processors = request.POST.getlist('processor')
+            if processors:
+                computer.processor.clear()
+                for processor in processors:
+                    processor_instance = get_object_or_404(Processor, pk=processor)
+                    computer.processor.add(processor_instance)
+
+            videoCards = request.POST.getlist('videoCard')
+            if videoCards:
+                computer.videoCard.clear()
+                for videoCard in videoCards:
+                    videoCard_instance = get_object_or_404(VideoCard, pk=videoCard)
+                    computer.videoCard.add(videoCard_instance)
+
+            lanCards = request.POST.getlist('lanCard')
+            if videoCards:
+                computer.lanCard.clear()
+                for lanCard in lanCards:
+                    lanCard_instance = get_object_or_404(LANcard, pk=lanCard)
+                    computer.lanCard.add(lanCard_instance)
+
+            rams = request.POST.get('ram')
+            if rams:
+                computer.ram.clear()
+                for ram in rams:
+                    ram_instance = get_object_or_404(RAM, pk=ram)
+                    computer.ram.add(ram_instance)
+        
+
+            hardDisks = request.POST.get('hardDisk')
+            if hardDisks:
+                computer.hardDisk.clear()
+                for hardDisk in hardDisks:
+                    hardDisk_instance = get_object_or_404(HardDisk, pk=hardDisk)
+                    computer.hardDisk.add(hardDisk_instance)
+
+            user = request.POST.get('user')
+            if user:
+                # Assuming `user` is a ManyToManyField or ForeignKey, handle it appropriately
+                computer.user.clear()
+                user_ids = user.split(',')  # Assuming user ids are sent as a comma-separated string
+                for user_id in user_ids:
+                    user_instance = get_object_or_404(UserName, pk=user_id)
+                    computer.user.add(user_instance)
+
+            windowses = request.POST.getlist('windows')
+            if windowses:
+                computer.windows.clear()
+                for windows in windowses:
+                    windows_instance = get_object_or_404(Windows, pk=windows)
+                    computer.windows.add(windows_instance)
+
+            typeDBs = request.POST.get('typeDB')
+            if typeDBs:
+                computer.typeDB.clear()
+                for typeDB in typeDBs:
+                    typeDB_instance = get_object_or_404(TypeDB, pk=typeDB)
+                    computer.typeDB.add(typeDB_instance)
+
+
+            monitors = request.POST.get('monitor')
+            if monitors:
+                computer.monitor.clear()
+                for monitor in monitors:
+                    monitor_instance = get_object_or_404(Monitor, pk=monitor)
+                    computer.monitor.add(monitor_instance)
+            
+
+            addSettings = request.POST.get('addSetting')
+            if addSettings:
+                computer.addSetting.clear()
+                for addSetting in addSettings:
+                    addSetting_instance = get_object_or_404(AdditionalSettings, pk=addSetting)
+                    computer.addSetting.add(addSetting_instance)
+
+            computer.save()
+            return JsonResponse({'message': 'Success'})
+        else:
+
+        
+            return JsonResponse({'errors': form.errors}, status=400)
 
     else:
         
-
+        form = ComputerForm(instance=computer)
         context = {
             'computer': computer,
+            'form': form,
             'customers': Customer.objects.filter(id=computer.customer.id),
             'employees': Employee.objects.filter(id=computer.employee.id),
             'locations': Location.objects.filter(computer=computer),
@@ -246,6 +256,155 @@ def computer_edit(request, computer_id):
     
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+
+
+def edit(request, computer_id):
+    computer = get_object_or_404(Computer, pk=computer_id)
+    customer_queryset = Customer.objects.filter(name=computer.customer.name)
+    location_queryset = computer.locations.all()
+    type_choices = Computer.objects.values_list('type', flat=True).distinct()
+    user_types = [choice[0] for choice in UserName.USER_TYPES]
+    processor_queryset = computer.processor.all()
+    videoCard_queryset = computer.videoCard.all()
+    lanCard_queryset = computer.lanCard.all()
+    ram_queryset = computer.ram.all()
+    hardDisk_queryset = computer.hardDisk.all()
+    windows_queryset = computer.windowses.all()
+    typeDB_queryset = computer.typeDB.all()
+    monitor_queryset = computer.monitor.all()
+    diskPlace_queryset = computer.diskPlace.all()
+    
+
+    if request.method == 'POST':
+        form = ComputerForm(request.POST, instance=computer, customer_queryset=customer_queryset)
+        if form.is_valid():
+            computer = form.save(commit=False)
+
+            # Обработка поля location_name
+            location_name = form.cleaned_data.get('location_name')
+            if location_name:
+                location, created = Location.objects.get_or_create(name=location_name, computer=computer)
+                computer.locations.clear()
+                computer.locations.add(location)
+
+            processor_name = form.cleaned_data.get('processor_name')
+            if processor_name:
+                processor, created = Processor.objects.get_or_create(name=processor_name, computer=computer)
+                computer.processor.clear()
+                computer.processor.add(processor)
+
+            videoCard_name = form.cleaned_data.get('videoCard_name')
+            if videoCard_name:
+                videoCard, created = VideoCard.objects.get_or_create(name=videoCard_name, computer=computer)
+                computer.videoCard.clear()
+                computer.videoCard.add(videoCard)
+
+
+            lanCard_name = form.cleaned_data.get('lanCard_name')
+            lanCard_series = form.cleaned_data.get('lanCard_series')
+            if lanCard_name and lanCard_series:
+                lanCard, created = LANcard.objects.get_or_create(type=lanCard_name, series=lanCard_series, computer=computer)
+                computer.lanCard.clear()
+                computer.lanCard.add(lanCard)
+            
+            
+
+            ram_type = form.cleaned_data.get('ram_type')
+            ram_gigabytes = form.cleaned_data.get('ram_gigabytes')
+            if ram_type and ram_gigabytes:
+                ram, created = RAM.objects.get_or_create(type=ram_type, gigabytes=ram_gigabytes, computer=computer)
+                computer.ram.clear()
+                computer.ram.add(ram)
+
+            hardDisk_type = request.POST.get('hardDisk_type')
+            hardDisk_gigabytes = request.POST.get('hardDisk_gigabytes')
+            if hardDisk_type and hardDisk_gigabytes:
+                hardDisk, created = HardDisk.objects.get_or_create(type=hardDisk_type, gigabytes=hardDisk_gigabytes)
+                computer.hardDisk.clear()
+                computer.hardDisk.add(hardDisk)
+
+            windows_name = request.POST.get('windows_name')
+            windows_licenseNumber = request.POST.get('windows_licenseNumber')
+            windows_licenseKeys = request.POST.get('windows_licenseKeys')
+            if windows_name and windows_licenseNumber and windows_licenseKeys:
+                windowses, created = Windows.objects.get_or_create(name=windows_name, licenseNumber=windows_licenseNumber, licenseKeys=windows_licenseKeys)
+                computer.windowses.clear()
+                computer.windowses.add(windowses)
+
+            typeDB_type = request.POST.get('typeDB_type')
+            typeDB_version = request.POST.get('typeDB_version')
+            if typeDB_type and typeDB_version:
+                typeDB, created = TypeDB.objects.get_or_create(type=typeDB_type, version=typeDB_version)
+                computer.typeDB.clear()
+                computer.typeDB.add(typeDB)
+
+
+            computer.addComment = form.cleaned_data.get('addComment_value')
+            computer.addDevices = form.cleaned_data.get('addDevices_value')
+            computer.addSoftware = form.cleaned_data.get('addSoftware_value')
+
+            monitor_name = form.cleaned_data.get('monitor_name')
+            if monitor_name:
+                monitor, created = Monitor.objects.get_or_create(name=monitor_name)
+                computer.monitor.clear()
+                computer.monitor.add(monitor)
+
+            diskPlace_name = form.cleaned_data.get('diskPlace_name')
+            if diskPlace_name:
+                diskPlace, created = DiskPlace.objects.get_or_create(name=diskPlace_name)
+                computer.monitor.clear()
+                computer.monitor.add(diskPlace)
+            
+
+            for user in UserName.objects.filter(computer=computer):
+                user_type = request.POST.get(f'user_type_{user.pk}')
+                user_name = request.POST.get(f'user_name_{user.pk}')
+                user_password = request.POST.get(f'password_{user.pk}')
+                if user_type:
+                    user.user_type = user_type
+                if user_name:
+                    user.login = user_name
+                if user_password:
+                    user.password = user_password
+                user.save()
+
+            computer.save()
+            form.save_m2m()  # Сохранение ManyToMany полей
+            return JsonResponse({'message': 'Success'})
+        else:
+            return JsonResponse({'error': form.errors}, status=400)
+    else:
+        form = ComputerForm(instance=computer, customer_queryset=customer_queryset)
+        form.fields['location_name'].initial = ', '.join(
+            [location.name for location in computer.locations.all()]
+        )
+        
+
+    context = {
+        'form': form,
+        'customer_queryset': customer_queryset,
+        'location_queryset': location_queryset,
+        'type_choices': type_choices,
+        'computer': computer,
+        'user_types': user_types,
+        'users': UserName.objects.filter(computer=computer),
+        'processor': Processor.objects.filter(computer=computer),
+        'processor_queryset': processor_queryset,
+        'videoCard': VideoCard.objects.filter(computer=computer),
+        'videoCard_queryset': videoCard_queryset,
+        'lanCard_queryset': lanCard_queryset,
+        'ram_queryset': ram_queryset,
+        'hardDisk_queryset': hardDisk_queryset,
+        'windows_queryset': windows_queryset,
+        'typeDB_queryset': typeDB_queryset,
+        'monitor_queryset': monitor_queryset,
+        'diskPlace_queryset': diskPlace_queryset,
+
+    }
+    return(render(request, 'home/edit.html', context))
+
 
 
 
