@@ -7,6 +7,7 @@ from .models import Computer, Order_Computer, Customer, Location, UserName, Empl
 from django.db.models import Q
 import json
 from .forms import ComputerForm
+from datetime import datetime
 
 
 # Create your views here.
@@ -263,24 +264,17 @@ def computer_edit(request, computer_id):
 def edit(request, computer_id):
     computer = get_object_or_404(Computer, pk=computer_id)
     customer_queryset = Customer.objects.filter(name=computer.customer.name)
-    location_queryset = computer.locations.all()
-    type_choices = Computer.objects.values_list('type', flat=True).distinct()
-    user_types = [choice[0] for choice in UserName.USER_TYPES]
-    processor_queryset = computer.processor.all()
-    videoCard_queryset = computer.videoCard.all()
-    lanCard_queryset = computer.lanCard.all()
-    ram_queryset = computer.ram.all()
-    hardDisk_queryset = computer.hardDisk.all()
-    windows_queryset = computer.windowses.all()
-    typeDB_queryset = computer.typeDB.all()
-    monitor_queryset = computer.monitor.all()
-    diskPlace_queryset = computer.diskPlace.all()
+    employee_queryset = Employee.objects.filter(name=computer.employee.name)
     
-
     if request.method == 'POST':
-        form = ComputerForm(request.POST, instance=computer, customer_queryset=customer_queryset)
+        form = ComputerForm(request.POST, request.FILES, instance=computer, customer_queryset=customer_queryset, employee_queryset=employee_queryset)
         if form.is_valid():
             computer = form.save(commit=False)
+            computer.date = form.cleaned_data.get('date') or computer.date
+
+            status = request.POST.get('status')
+            if status in ['Progress', 'Ready', 'Confirm']:
+                computer.status = status
 
             # Обработка поля location_name
             location_name = form.cleaned_data.get('location_name')
@@ -301,15 +295,12 @@ def edit(request, computer_id):
                 computer.videoCard.clear()
                 computer.videoCard.add(videoCard)
 
-
-            lanCard_name = form.cleaned_data.get('lanCard_name')
+            lanCard_type = form.cleaned_data.get('lanCard_type')
             lanCard_series = form.cleaned_data.get('lanCard_series')
-            if lanCard_name and lanCard_series:
-                lanCard, created = LANcard.objects.get_or_create(type=lanCard_name, series=lanCard_series, computer=computer)
+            if lanCard_type and lanCard_series:
+                lanCard, created = LANcard.objects.get_or_create(type=lanCard_type, series=lanCard_series, computer=computer)
                 computer.lanCard.clear()
                 computer.lanCard.add(lanCard)
-            
-            
 
             ram_type = form.cleaned_data.get('ram_type')
             ram_gigabytes = form.cleaned_data.get('ram_gigabytes')
@@ -340,7 +331,6 @@ def edit(request, computer_id):
                 computer.typeDB.clear()
                 computer.typeDB.add(typeDB)
 
-
             computer.addComment = form.cleaned_data.get('addComment_value')
             computer.addDevices = form.cleaned_data.get('addDevices_value')
             computer.addSoftware = form.cleaned_data.get('addSoftware_value')
@@ -356,7 +346,13 @@ def edit(request, computer_id):
                 diskPlace, created = DiskPlace.objects.get_or_create(name=diskPlace_name)
                 computer.monitor.clear()
                 computer.monitor.add(diskPlace)
-            
+
+            addSettings_name = request.POST.get('addSettings_name')
+            addSettings_text = request.POST.get('addSettings_text')
+            if addSettings_name and addSettings_text:
+                addSettings, created = AdditionalSettings.objects.get_or_create(name=addSettings_name, text=addSettings_text)
+                computer.addSettings.clear()
+                computer.addSettings.add(addSettings)
 
             for user in UserName.objects.filter(computer=computer):
                 user_type = request.POST.get(f'user_type_{user.pk}')
@@ -380,30 +376,53 @@ def edit(request, computer_id):
         form.fields['location_name'].initial = ', '.join(
             [location.name for location in computer.locations.all()]
         )
-        
 
     context = {
         'form': form,
         'customer_queryset': customer_queryset,
-        'location_queryset': location_queryset,
-        'type_choices': type_choices,
+        'location_queryset': computer.locations.all(),
+        'type_choices': Computer.objects.values_list('type', flat=True).distinct(),
         'computer': computer,
-        'user_types': user_types,
+        'user_types': [choice[0] for choice in UserName.USER_TYPES],
         'users': UserName.objects.filter(computer=computer),
-        'processor': Processor.objects.filter(computer=computer),
-        'processor_queryset': processor_queryset,
-        'videoCard': VideoCard.objects.filter(computer=computer),
-        'videoCard_queryset': videoCard_queryset,
-        'lanCard_queryset': lanCard_queryset,
-        'ram_queryset': ram_queryset,
-        'hardDisk_queryset': hardDisk_queryset,
-        'windows_queryset': windows_queryset,
-        'typeDB_queryset': typeDB_queryset,
-        'monitor_queryset': monitor_queryset,
-        'diskPlace_queryset': diskPlace_queryset,
-
+        'processor': computer.processor.all(),
+        'processor_queryset': computer.processor.all(),
+        'videoCard': computer.videoCard.all(),
+        'videoCard_queryset': computer.videoCard.all(),
+        'lanCard_queryset': computer.lanCard.all(),
+        'ram_queryset': computer.ram.all(),
+        'hardDisk_queryset': computer.hardDisk.all(),
+        'windows_queryset': computer.windowses.all(),
+        'typeDB_queryset': computer.typeDB.all(),
+        'monitor_queryset': computer.monitor.all(),
+        'diskPlace_queryset': computer.diskPlace.all(),
+        'addSettings_queryset': computer.addSettings.all(),
+        'employee_queryset': employee_queryset,
     }
-    return(render(request, 'home/edit.html', context))
+    return render(request, 'home/edit.html', context)
+
+
+
+
+def update_computer_status(request, computer_id):
+    computer = get_object_or_404(Computer, pk=computer_id)
+    new_status = request.POST.get('status')
+
+    valid_transitions = {
+        'Progress': ['Ready'],
+        'Ready': ['Confirm'],
+        'Confirm': []
+    }
+
+    if new_status in valid_transitions[computer.status]:
+        computer.status = new_status
+        computer.save()
+        return JsonResponse({'success': True, 'status': new_status})
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid status transition'}, status=400)
+
+
+
 
 
 

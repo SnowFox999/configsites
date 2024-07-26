@@ -55,13 +55,13 @@ class Computer(models.Model):
     
     user = models.ManyToManyField('UserName', blank=True)
     
-    date = models.DateField(default=date.today)
+    date = models.DateField()
     employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, related_name='computer', null=True)
     addSoftware = models.TextField(null=True, blank=True)
     addDevices = models.TextField(null=True, blank=True)
     addComment = models.TextField(null=True, blank=True)
     addSettings = models.ManyToManyField('AdditionalSettings', blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Progress')
     
     
 
