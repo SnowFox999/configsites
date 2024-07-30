@@ -2,34 +2,34 @@ from django import forms
 from .models import Customer, Employee, Computer, Processor, RAM, HardDisk, DiskPlace, VideoCard, TypeDB, LANcard, Location, Monitor, UserName, AdditionalSettings, Windows, Order_Computer
 
 class ComputerForm(forms.ModelForm):
-    customer_name = forms.ChoiceField(max_length=255, required=False)
-    location_name = forms.ChoiceField(max_length=30, required=False)
-    computer_type = forms.CharField(max_length=100, required=False)
-    processor_name = forms.CharField(max_length=100, required=False)
-    videoCard_name = forms.CharField(max_length=100, required=False)
-    lanCard_type = forms.CharField(max_length=100, required=False)
-    lanCard_series = forms.CharField(max_length=100, required=False)
-    ram_type = forms.CharField(max_length=100, required=False)
-    ram_gigabytes = forms.CharField(max_length=5, required=False)
-    hardDisk_type = forms.CharField(max_length=100, required=False)
-    hardDisk_gigabytes = forms.CharField(max_length=4, required=False)
-    windows_name = forms.CharField(max_length=20, required=False)
-    windows_licenseNumber = forms.CharField(max_length=50, required=False)
-    windows_licenseKeys = forms.CharField(max_length=50, required=False)
-    typeDB_type = forms.CharField(max_length=20, required=False)
-    typeDB_version = forms.CharField(max_length=20, required=False)
-    addComment_value = forms.CharField(max_length=255, required= False)
-    addDevices_value = forms.CharField(max_length=255, required=False)
-    addSoftware_value = forms.CharField(max_length=255, required=False)
-    monitor_name = forms.CharField(max_length=100, required=False)
-    diskPlace_name = forms.CharField(max_length=100, required=False)
-    addSettings_name = forms.CharField(max_length=20, required=False)
-    addSettings_text = forms.CharField(max_length=100, required=False)
+    customer_name = forms.ChoiceField(required=False)
+    location_name = forms.ChoiceField(required=False)
+    computer_type = forms.CharField(required=False)
+    processor_name = forms.MultipleChoiceField(required=False)
+    videoCard_name = forms.MultipleChoiceField(required=False)
+    lanCard_type = forms.MultipleChoiceField(required=False)
+    lanCard_series = forms.MultipleChoiceField(required=False)
+    ram_type = forms.ChoiceField(required=False)
+    ram_gigabytes = forms.ChoiceField(required=False)
+    hardDisk_type = forms.MultipleChoiceField(required=False)
+    hardDisk_gigabytes = forms.MultipleChoiceField(required=False)
+    windows_name = forms.ChoiceField(required=False)
+    windows_licenseNumber = forms.ChoiceField(required=False)
+    windows_licenseKeys = forms.ChoiceField(required=False)
+    typeDB_type = forms.MultipleChoiceField(required=False)
+    typeDB_version = forms.MultipleChoiceField(required=False)
+    addComment_value = forms.CharField(required= False)
+    addDevices_value = forms.CharField(required=False)
+    addSoftware_value = forms.CharField(required=False)
+    monitor_name = forms.MultipleChoiceField(required=False)
+    diskPlace_name = forms.MultipleChoiceField(required=False)
+    addSettings_name = forms.MultipleChoiceField(required=False)
+    addSettings_text = forms.MultipleChoiceField(required=False)
     date = forms.DateField(
         required=False, 
-        input_formats=['%d/%M/%Y'], 
-        widget=forms.DateInput(attrs={'data-inputmask-alias': 'datetime', 'data-inputmask-inputformat': 'dd/mm/yyyy', 'data-mask': ''}))
-    employee_name = forms.CharField(max_length=255, required=False)
+        input_formats=['%b/%d/%Y'], 
+        )
+    employee_name = forms.ChoiceField(required=False)
     
    
     
@@ -42,6 +42,10 @@ class ComputerForm(forms.ModelForm):
         customer_queryset = kwargs.pop('customer_queryset', Customer.objects.all())
         employee_queryset = kwargs.pop('employee_queryset', Employee.objects.all())
         super().__init__(*args, **kwargs)
+
+
+        self.fields['customer_name'].choices = [(customer.id, customer.name) for customer in customer_queryset]
+        self.fields['employee_name'].choices = [(employee.id, employee.name) for employee in employee_queryset]
 
         # Установка начальных значений для полей
         self._set_initial_values()
@@ -128,9 +132,6 @@ class ComputerForm(forms.ModelForm):
         cleaned_data = super().clean()
         computer_type = cleaned_data.get('computer_type')
 
-        # Проверка на заполненность поля `type` или `custom_type`
-        if not computer_type and not (cleaned_data.get('type') or cleaned_data.get('custom_type')):
-            raise forms.ValidationError("Either 'type' or 'custom_type' must be filled.")
 
         # Логика обработки полей `type` и `custom_type`
         if computer_type:
@@ -141,11 +142,6 @@ class ComputerForm(forms.ModelForm):
             else:
                 cleaned_data['type'] = computer_type
                 cleaned_data['custom_type'] = None
-
-        return cleaned_data
-    
-    def clean(self):
-        cleaned_data = super().clean()
 
         ram_type = cleaned_data.get('ram_type')
         if ram_type and len(ram_type) > 100:

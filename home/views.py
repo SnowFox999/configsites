@@ -8,6 +8,10 @@ from django.db.models import Q
 import json
 from .forms import ComputerForm
 from datetime import datetime
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.utils.dateparse import parse_date
 
 
 # Create your views here.
@@ -242,7 +246,7 @@ def computer_edit(request, computer_id):
             'processors': Processor.objects.filter(computer=computer),
             'videoCards': VideoCard.objects.filter(computer=computer),
             'lanCards': LANcard.objects.filter(computer=computer),
-            'rams': RAM.objects.filter(computer=computer),
+            'rams': RAM.objects.all(),
             'hardDisks': HardDisk.objects.filter(computer=computer),
             'windowses': Windows.objects.filter(computer=computer),
             'typeDBs': TypeDB.objects.all(),
@@ -260,30 +264,27 @@ def computer_edit(request, computer_id):
 
 
 
-
 def edit(request, computer_id):
     computer = get_object_or_404(Computer, pk=computer_id)
     customer_queryset = Customer.objects.filter(name=computer.customer.name)
     employee_queryset = Employee.objects.filter(name=computer.employee.name)
-    
+
     if request.method == 'POST':
         form = ComputerForm(request.POST, request.FILES, instance=computer, customer_queryset=customer_queryset, employee_queryset=employee_queryset)
         if form.is_valid():
             computer = form.save(commit=False)
-            computer.date = form.cleaned_data.get('date') or computer.date
-
+            computer.date = timezone.now()
             status = request.POST.get('status')
             if status in ['Progress', 'Ready', 'Confirm']:
                 computer.status = status
 
-            # Обработка поля location_name
             location_name = form.cleaned_data.get('location_name')
             if location_name:
                 location, created = Location.objects.get_or_create(name=location_name, computer=computer)
                 computer.locations.clear()
                 computer.locations.add(location)
 
-            processor_name = form.cleaned_data.get('processor_name')
+            processor_name = request.POST.get('processor_name')
             if processor_name:
                 processor, created = Processor.objects.get_or_create(name=processor_name, computer=computer)
                 computer.processor.clear()
@@ -305,7 +306,7 @@ def edit(request, computer_id):
             ram_type = form.cleaned_data.get('ram_type')
             ram_gigabytes = form.cleaned_data.get('ram_gigabytes')
             if ram_type and ram_gigabytes:
-                ram, created = RAM.objects.get_or_create(type=ram_type, gigabytes=ram_gigabytes, computer=computer)
+                ram, created = RAM.objects.get_or_create(type=ram_type, gigabytes=ram_gigabytes)
                 computer.ram.clear()
                 computer.ram.add(ram)
 
@@ -372,16 +373,126 @@ def edit(request, computer_id):
         else:
             return JsonResponse({'error': form.errors}, status=400)
     else:
-        form = ComputerForm(instance=computer, customer_queryset=customer_queryset)
-        form.fields['location_name'].initial = ', '.join(
-            [location.name for location in computer.locations.all()]
-        )
+        form = ComputerForm(instance=computer, customer_queryset=customer_queryset, employee_queryset=employee_queryset)
+
+
+    
+    # if request.method == 'POST':
+    #     form = ComputerForm(request.POST, request.FILES, instance=computer, customer_queryset=customer_queryset, employee_queryset=employee_queryset)
+    #     if form.is_valid():
+    #         computer = form.save(commit=False)
+    #         computer.date =  timezone.now()
+    #         status = request.POST.get('status')
+    #         if status in ['Progress', 'Ready', 'Confirm']:
+    #             computer.status = status
+
+            
+
+    #         # Обработка поля location_name
+    #         location_name = form.cleaned_data.get('location_name')
+    #         if location_name:
+    #             location, created = Location.objects.get_or_create(name=location_name, computer=computer)
+    #             computer.locations.clear()
+    #             computer.locations.add(location)
+
+            
+    #         processor_name = request.POST.get('processor_name')
+    #         if processor_name:
+    #             processor, created = Processor.objects.get_or_create(name=processor_name, computer=computer)
+    #             computer.processor.clear()
+    #             computer.processor.add(processor)
+
+    #         videoCard_name = form.cleaned_data.get('videoCard_name')
+    #         if videoCard_name:
+    #             videoCard, created = VideoCard.objects.get_or_create(name=videoCard_name, computer=computer)
+    #             computer.videoCard.clear()
+    #             computer.videoCard.add(videoCard)
+
+    #         lanCard_type = form.cleaned_data.get('lanCard_type')
+    #         lanCard_series = form.cleaned_data.get('lanCard_series')
+    #         if lanCard_type and lanCard_series:
+    #             lanCard, created = LANcard.objects.get_or_create(type=lanCard_type, series=lanCard_series, computer=computer)
+    #             computer.lanCard.clear()
+    #             computer.lanCard.add(lanCard)
+
+    #         ram_type = form.cleaned_data.get('ram_type')
+    #         ram_gigabytes = form.cleaned_data.get('ram_gigabytes')
+    #         if ram_type and ram_gigabytes:
+    #             ram, created = RAM.objects.get_or_create(type=ram_type, gigabytes=ram_gigabytes, computer=computer)
+    #             computer.ram.clear()
+    #             computer.ram.add(ram)
+
+    #         hardDisk_type = request.POST.get('hardDisk_type')
+    #         hardDisk_gigabytes = request.POST.get('hardDisk_gigabytes')
+    #         if hardDisk_type and hardDisk_gigabytes:
+    #             hardDisk, created = HardDisk.objects.get_or_create(type=hardDisk_type, gigabytes=hardDisk_gigabytes)
+    #             computer.hardDisk.clear()
+    #             computer.hardDisk.add(hardDisk)
+
+    #         windows_name = request.POST.get('windows_name')
+    #         windows_licenseNumber = request.POST.get('windows_licenseNumber')
+    #         windows_licenseKeys = request.POST.get('windows_licenseKeys')
+    #         if windows_name and windows_licenseNumber and windows_licenseKeys:
+    #             windowses, created = Windows.objects.get_or_create(name=windows_name, licenseNumber=windows_licenseNumber, licenseKeys=windows_licenseKeys)
+    #             computer.windowses.clear()
+    #             computer.windowses.add(windowses)
+
+    #         typeDB_type = request.POST.get('typeDB_type')
+    #         typeDB_version = request.POST.get('typeDB_version')
+    #         if typeDB_type and typeDB_version:
+    #             typeDB, created = TypeDB.objects.get_or_create(type=typeDB_type, version=typeDB_version)
+    #             computer.typeDB.clear()
+    #             computer.typeDB.add(typeDB)
+
+    #         computer.addComment = form.cleaned_data.get('addComment_value')
+    #         computer.addDevices = form.cleaned_data.get('addDevices_value')
+    #         computer.addSoftware = form.cleaned_data.get('addSoftware_value')
+
+    #         monitor_name = form.cleaned_data.get('monitor_name')
+    #         if monitor_name:
+    #             monitor, created = Monitor.objects.get_or_create(name=monitor_name)
+    #             computer.monitor.clear()
+    #             computer.monitor.add(monitor)
+
+    #         diskPlace_name = form.cleaned_data.get('diskPlace_name')
+    #         if diskPlace_name:
+    #             diskPlace, created = DiskPlace.objects.get_or_create(name=diskPlace_name)
+    #             computer.monitor.clear()
+    #             computer.monitor.add(diskPlace)
+
+    #         addSettings_name = request.POST.get('addSettings_name')
+    #         addSettings_text = request.POST.get('addSettings_text')
+    #         if addSettings_name and addSettings_text:
+    #             addSettings, created = AdditionalSettings.objects.get_or_create(name=addSettings_name, text=addSettings_text)
+    #             computer.addSettings.clear()
+    #             computer.addSettings.add(addSettings)
+
+    #         for user in UserName.objects.filter(computer=computer):
+    #             user_type = request.POST.get(f'user_type_{user.pk}')
+    #             user_name = request.POST.get(f'user_name_{user.pk}')
+    #             user_password = request.POST.get(f'password_{user.pk}')
+    #             if user_type:
+    #                 user.user_type = user_type
+    #             if user_name:
+    #                 user.login = user_name
+    #             if user_password:
+    #                 user.password = user_password
+    #             user.save()
+
+    #         computer.save()
+    #         form.save_m2m()  # Сохранение ManyToMany полей
+    #         return JsonResponse({'message': 'Success'})
+    #     else:
+    #         return JsonResponse({'error': form.errors}, status=400)
+    # else:
+    #     form = ComputerForm(instance=computer, customer_queryset=customer_queryset)
+        
 
     context = {
         'form': form,
         'customer_queryset': customer_queryset,
         'location_queryset': computer.locations.all(),
-        'type_choices': Computer.objects.values_list('type', flat=True).distinct(),
+        'type_choices': [choice[0] for choice in Computer.TYPE_CHOICES],
         'computer': computer,
         'user_types': [choice[0] for choice in UserName.USER_TYPES],
         'users': UserName.objects.filter(computer=computer),
@@ -390,8 +501,10 @@ def edit(request, computer_id):
         'videoCard': computer.videoCard.all(),
         'videoCard_queryset': computer.videoCard.all(),
         'lanCard_queryset': computer.lanCard.all(),
-        'ram_queryset': computer.ram.all(),
-        'hardDisk_queryset': computer.hardDisk.all(),
+        'ram_gigabytes': [choice[0] for choice in RAM.GIGABYTES_TYPES],
+        'ram_types': [choice[0] for choice in RAM.RAM_TYPES],
+        'hardDisk_gigabytes': [choice[0] for choice in HardDisk.GIGABYTES_TYPES],
+        'hardDisk_types': [choice[0] for choice in HardDisk.DISK_TYPES],
         'windows_queryset': computer.windowses.all(),
         'typeDB_queryset': computer.typeDB.all(),
         'monitor_queryset': computer.monitor.all(),
@@ -400,6 +513,175 @@ def edit(request, computer_id):
         'employee_queryset': employee_queryset,
     }
     return render(request, 'home/edit.html', context)
+
+
+
+
+
+@csrf_exempt  # 
+def save_computer_data(request):
+     
+    if request.method == 'POST':
+        field_name = request.POST.get('field_name')
+        field_value = request.POST.get('field_value')
+        computer_id = request.POST.get('computer_id')
+
+        # Отладочный вывод
+        print("Received data:", field_name, field_value, computer_id)
+
+        if not field_name or not field_value or not computer_id:
+            return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
+
+        try:
+            computer = Computer.objects.get(id=computer_id)
+        except Computer.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Computer not found'}, status=404)
+
+        try:
+            if field_name == 'ComputerType':
+                if field_value in dict(Computer.TYPE_CHOICES):
+                    computer.type = field_value
+                    computer.custom_type = ''
+                else:
+                    computer.type = ''
+                    computer.custom_type = field_value
+
+
+            elif field_name == 'locations_name':
+                location, created = Location.objects.get_or_create(name=field_value, computer=computer)
+                computer.locations.set([location])
+                
+
+
+            elif field_name == 'diskPlace':
+                diskPlace, created = DiskPlace.objects.get_or_create(name=field_value)
+                computer.diskPlace.set([diskPlace])
+
+
+            elif field_name == 'addSettings_name':
+                addSettings_name, created = AdditionalSettings.objects.get_or_create(name=field_value, computer=computer)
+                computer.addSettings.set([addSettings_name])
+
+            elif field_name == 'addSettings_text':
+                addSettings_text, created = AdditionalSettings.objects.get_or_create(text=field_value, computer=computer)
+                computer.addSettings.set([addSettings_text])
+
+
+            elif field_name == 'MonitorName':
+                MonitorName, created = Monitor.objects.get_or_create(name=field_value)
+                computer.monitor.set([MonitorName])
+
+
+            elif field_name == 'windows_name':
+                name, created = Windows.objects.get_or_create(name=field_value)
+                computer.windowses.set([name])
+
+
+
+
+            elif field_name == 'Processor':
+                processor, created = Processor.objects.get_or_create(name=field_value)
+                computer.processor.set([processor])
+
+            elif field_name == 'ram_type':
+                ram_type, created = RAM.objects.get_or_create(type=field_value)
+                computer.ram.set([ram_type])
+            elif field_name == 'ram_gigabytes':
+                ram_gigabytes, created = RAM.objects.get_or_create(gigabytes=field_value)
+                computer.ram.set([ram_gigabytes])
+
+            
+            elif field_name == 'disk_type':
+                disk_type, created = HardDisk.objects.get_or_create(type=field_value)
+                computer.hardDisk.set([disk_type])
+            elif field_name == 'disk_gigabytes':
+                disk_gigabytes, created = HardDisk.objects.get_or_create(gigabytes=field_value)
+                computer.hardDisk.set([disk_gigabytes])
+
+
+            elif field_name == 'videoCard':
+                videoCard, created = VideoCard.objects.get_or_create(name=field_value)
+                computer.videoCard.set([videoCard])
+            elif field_name == 'TypeDB':
+                typeDB_parts = field_value.split()
+                if len(typeDB_parts) != 2:
+                    raise ValueError("TypeDB field must be in the format 'type version'")
+                typeDB, created = TypeDB.objects.get_or_create(type=typeDB_parts[0], version=typeDB_parts[1])
+                computer.typeDB.set([typeDB])
+            elif field_name == 'LANcard':
+                
+                lanCard, created = LANcard.objects.get_or_create(type=lanCard_parts[0], series=lanCard_parts[1])
+                computer.lanCard.set([lanCard])
+            elif field_name == 'date':
+                try:
+                    date_obj = parse_date(field_value)
+                    if date_obj is None:
+                        raise ValueError("Invalid date format")
+                    computer.date = date_obj
+                except ValueError:
+                    return JsonResponse({'status': 'error', 'message': 'Invalid date format. Use "YYYY-MM-DD".'}, status=400)
+
+
+
+
+            else:
+                if hasattr(computer, field_name):
+                    setattr(computer, field_name, field_value)
+                else:
+                    return JsonResponse({'status': 'error', 'message': 'Invalid field name'}, status=400)
+
+            computer.save()
+            return JsonResponse({'status': 'success'})
+        except ValidationError as e:
+            return JsonResponse({'status': 'error', 'message': f'Validation error: {e}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+
+    # if request.method == 'POST':
+    #     field_name = request.POST.get('field_name')
+    #     field_value = request.POST.get('field_value')
+    #     computer_id = request.POST.get('computer_id')
+
+    #     print("Received data:", field_name, field_value, computer_id)
+
+    #     if field_name and field_value and computer_id:
+    #         try:
+    #             computer = Computer.objects.get(id=computer_id)
+    #             if field_name in [field.name for field in Computer._meta.get_fields()]:
+    #                 # Обработка полей ManyToMany
+    #                 if field_name in ['diskPlace', 'addSettings']:  # Замените на ваши поля ManyToMany
+    #                     if field_name == 'diskPlace':
+    #                         diskPlace, created = DiskPlace.objects.get_or_create(name=field_value)
+    #                         computer.diskPlace.set([diskPlace])
+    #                     elif field_name == 'addSettings':
+    #                         addSettings, created = AdditionalSettings.objects.get_or_create(name=field_value)
+    #                         computer.addSettings.set([addSettings])
+    #                 else:
+    #                     # Обработка обычных полей
+    #                     setattr(computer, field_name, field_value)
+    #                 computer.save()
+    #                 return JsonResponse({'status': 'success'})
+    #             else:
+    #                 return JsonResponse({'status': 'error', 'message': 'Invalid field name'}, status=400)
+    #         except Computer.DoesNotExist:
+    #             return JsonResponse({'status': 'error', 'message': 'Computer not found'}, status=400)
+        
+    #     return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
+    # else:
+    #     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+
+
+
+
+
+
+
+
 
 
 

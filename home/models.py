@@ -31,32 +31,29 @@ class Computer(models.Model):
         ('Fujitsu ESPRIMO P557', 'Fujitsu ESPRIMO P557'),
     ]
     
-    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='computers') #connect to customer
-    name = models.CharField(max_length=20) # name of computer
-    serial_number = models.CharField(max_length=30, unique=True) #serial numer
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='computers', blank=True) #connect to customer
+    name = models.CharField(max_length=20, blank=True) # name of computer
+    serial_number = models.CharField(max_length=30, unique=True, blank=True) #serial numer
     type = models.CharField(max_length=30, choices=TYPE_CHOICES, blank=True, null=True)
     custom_type = models.CharField(max_length=30, blank=True, null=True)
 
-    def clean(self):
-        super().clean()
-        if not self.type and not self.custom_type:
-            raise ValidationError("Either 'type' or 'custom_type' must be filled.")
+    
 
    
 
-    processor = models.ManyToManyField('Processor') #many processors to many computers
-    ram = models.ManyToManyField('RAM') # many to many RAM
-    hardDisk = models.ManyToManyField('HardDisk') # many to many HardDisk
+    processor = models.ManyToManyField('Processor', blank=True) #many processors to many computers
+    ram = models.ManyToManyField('RAM', blank=True) # many to many RAM
+    hardDisk = models.ManyToManyField('HardDisk', blank=True) # many to many HardDisk
     diskPlace = models.ManyToManyField('DiskPlace', blank=True) # many to many CD/DVD
-    videoCard = models.ManyToManyField('VideoCard') # many to many graphics card
-    typeDB = models.ManyToManyField('TypeDB') #type of data base
-    lanCard = models.ManyToManyField('LANcard') # netzwerkkarte
+    videoCard = models.ManyToManyField('VideoCard', blank=True) # many to many graphics card
+    typeDB = models.ManyToManyField('TypeDB', blank=True) #type of data base
+    lanCard = models.ManyToManyField('LANcard', blank=True) # netzwerkkarte
     monitor = models.ManyToManyField('Monitor', blank=True) #Monitor
     
     user = models.ManyToManyField('UserName', blank=True)
     
-    date = models.DateField()
-    employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, related_name='computer', null=True)
+    date = models.DateField(null=True, blank=True)
+    employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, related_name='computer', null=True, blank=True)
     addSoftware = models.TextField(null=True, blank=True)
     addDevices = models.TextField(null=True, blank=True)
     addComment = models.TextField(null=True, blank=True)
@@ -76,15 +73,39 @@ class Processor(models.Model):
         return self.name
     
 class RAM(models.Model):
-    gigabytes = models.PositiveSmallIntegerField() #gigabytes of RAM
-    type = models.CharField(max_length=10) #type of RAM (DDR4, DDR3)
+    GIGABYTES_TYPES = [
+        ('16', '16'),
+        ('32', '32'),
+        ('64', '64'),
+        ('128', '128'),
+        
+    ]
+    RAM_TYPES = [
+        ('DDR3', 'DDR3'),
+        ('DDR4', 'DDR4'),
+        
+    ]
+    gigabytes = models.PositiveSmallIntegerField(choices=GIGABYTES_TYPES) #gigabytes of RAM
+    type = models.CharField(max_length=10, choices=RAM_TYPES) #type of RAM (DDR4, DDR3)
 
     def __str__(self):
         return f'{self.gigabytes} GB {self.type}'
     
 class HardDisk(models.Model):
-    gigabytes = models.PositiveSmallIntegerField() #gigabytes of disk
-    type = models.CharField(max_length=10) #type of disk (SSD,HDD)
+    GIGABYTES_TYPES = [
+        ('128', '128'),
+        ('256', '256'),
+        ('512', '512'),
+        ('1024', '1024'),
+        
+    ]
+    DISK_TYPES = [
+        ('SSD', 'SSD'),
+        ('HDD', 'HDD'),
+        
+    ]
+    gigabytes = models.PositiveSmallIntegerField(choices=GIGABYTES_TYPES) #gigabytes of disk
+    type = models.CharField(max_length=10, choices=DISK_TYPES) #type of disk (SSD,HDD)
 
     def __str__(self):
         return f'{self.gigabytes} GB {self.type}'
