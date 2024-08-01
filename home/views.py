@@ -548,66 +548,196 @@ def save_computer_data(request):
 
 
             elif field_name == 'locations_name':
-                location, created = Location.objects.get_or_create(name=field_value, computer=computer)
-                computer.locations.set([location])
+                existing_location = computer.locations.first()
+
+                if existing_location:
+                    existing_location.name = field_value
+                    existing_location.save()
+                else:
+                    location = Location(name=field_value)
+                    
+                    location.save()
+                    computer.locations.add(location)
                 
 
 
             elif field_name == 'diskPlace':
-                diskPlace, created = DiskPlace.objects.get_or_create(name=field_value)
-                computer.diskPlace.set([diskPlace])
+                existing_diskPlace = computer.diskPlace.first()
+
+                if existing_diskPlace:
+                    existing_diskPlace.name = field_value
+                    existing_diskPlace.save()
+                else:
+                    diskPlace = DiskPlace(name=field_value)
+                    
+                    diskPlace.save()
+                    computer.diskPlace.add(location)
+
+                
 
 
-            elif field_name == 'addSettings_name':
-                addSettings_name, created = AdditionalSettings.objects.get_or_create(name=field_value, computer=computer)
-                computer.addSettings.set([addSettings_name])
+            elif field_name == 'addSettings_name' or field_name == 'addSettings_text':
+                existing_add_settings = computer.addSettings.first()
 
-            elif field_name == 'addSettings_text':
-                addSettings_text, created = AdditionalSettings.objects.get_or_create(text=field_value, computer=computer)
-                computer.addSettings.set([addSettings_text])
+                if existing_add_settings:
+                    # Если запись существует, обновляем её
+                    if field_name == 'addSettings_name':
+                        existing_add_settings.name = field_value
+                    elif field_name == 'addSettings_text':
+                        existing_add_settings.text = field_value
 
+                    existing_add_settings.save()
+                else:
+                    # Если записи нет, создаем новую
+                    if field_name == 'addSettings_name':
+                        addSettings = AdditionalSettings(name=field_value)
+                    elif field_name == 'addSettings_text':
+                        addSettings = AdditionalSettings(text=field_value)
+
+                    addSettings.save()
+                    computer.addSettings.add(addSettings)
 
             elif field_name == 'MonitorName':
-                MonitorName, created = Monitor.objects.get_or_create(name=field_value)
-                computer.monitor.set([MonitorName])
+                existing_monitor = computer.monitor.first()
+
+                if existing_monitor:
+                    existing_monitor.name = field_value
+                    existing_monitor.save()
+                else:
+                    monitor = Monitor(name=field_value)
+                    
+                    monitor.save()
+                    computer.monitor.add(monitor)
+
+               
 
 
-            elif field_name == 'windows_name':
-                name, created = Windows.objects.get_or_create(name=field_value)
-                computer.windowses.set([name])
+            elif field_name == 'windows_name' or field_name == 'windows_licenseNumber' or field_name == 'windows_licenseKeys':
+                
+                existing_windows = computer.windowses.first()
+                if existing_windows:
+                    # Если запись существует, обновляем её
+                    if field_name == 'windows_name':
+                        existing_windows.name = field_value
+                    elif field_name == 'windows_licenseNumber':
+                        existing_windows.licenseNumber = field_value
+                    elif field_name == 'windows_licenseKeys':
+                        existing_windows.licenseKeys = field_value
+
+                    existing_windows.save()
+                else:
+                    # Если записи нет, создаем новую
+                    if field_name == 'windows_name':
+                        windows = Windows(name=field_value)
+                    elif field_name == 'windows_licenseNumber':
+                        windows = Windows(licenseNumber=field_value)
+                    elif field_name == 'windows_licenseKeys':
+                        windows = Windows(licenseKeys =field_value)
+
+                    windows.save()
+                    computer.windowses.add(windows)
 
 
 
 
             elif field_name == 'Processor':
-                processor, created = Processor.objects.get_or_create(name=field_value)
-                computer.processor.set([processor])
 
-            elif field_name == 'ram_type':
-                ram_type, created = RAM.objects.get_or_create(type=field_value)
-                computer.ram.set([ram_type])
-            elif field_name == 'ram_gigabytes':
-                ram_gigabytes, created = RAM.objects.get_or_create(gigabytes=field_value)
-                computer.ram.set([ram_gigabytes])
+                existing_processor = computer.processor.first()
 
-            
-            elif field_name == 'disk_type':
-                disk_type, created = HardDisk.objects.get_or_create(type=field_value)
-                computer.hardDisk.set([disk_type])
-            elif field_name == 'disk_gigabytes':
-                disk_gigabytes, created = HardDisk.objects.get_or_create(gigabytes=field_value)
-                computer.hardDisk.set([disk_gigabytes])
+                if existing_processor:
+                    existing_processor.name = field_value
+                    existing_processor.save()
+                else:
+                    processor = Processor(name=field_value)
+                    
+                    processor.save()
+                    computer.processor.add(processor)
+ 
 
+            elif field_name == 'ram_type' or field_name =='ram_gigabytes':
+
+                existing_ram = computer.ram.first()
+
+                if existing_ram:
+                    # Если запись существует, обновляем её
+                    if field_name == 'ram_type':
+                        existing_ram.type = field_value
+                    elif field_name == 'ram_gigabytes':
+                        existing_ram.gigabytes = field_value
+
+                    existing_ram.save()
+                else:
+                    # Если записи нет, создаем новую
+                    if field_name == 'ram_type':
+                        ram = RAM(type=field_value)
+                    elif field_name == 'ram_gigabytes':
+                        ram = RAM(gigabytes=field_value)
+
+                    ram.save()
+                    computer.ram.add(ram)
+
+
+
+            elif field_name == 'disk_type' or field_name =='disk_gigabytes':
+
+                existing_disk = computer.hardDisk.first()
+
+                if existing_disk:
+                    # Если запись существует, обновляем её
+                    if field_name == 'disk_type':
+                        existing_disk.type = field_value
+                    elif field_name == 'disk_gigabytes':
+                        existing_disk.gigabytes = field_value
+
+                    existing_disk.save()
+                else:
+                    # Если записи нет, создаем новую
+                    if field_name == 'disk_type':
+                        hardDisk = HardDisk(type=field_value)
+                    elif field_name == 'disk_gigabytes':
+                        hardDisk = HardDisk(gigabytes=field_value)
+
+                    hardDisk.save()
+                    computer.hardDisk.add(hardDisk)
 
             elif field_name == 'videoCard':
-                videoCard, created = VideoCard.objects.get_or_create(name=field_value)
-                computer.videoCard.set([videoCard])
-            elif field_name == 'TypeDB':
-                typeDB_parts = field_value.split()
-                if len(typeDB_parts) != 2:
-                    raise ValueError("TypeDB field must be in the format 'type version'")
-                typeDB, created = TypeDB.objects.get_or_create(type=typeDB_parts[0], version=typeDB_parts[1])
-                computer.typeDB.set([typeDB])
+                existing_videoCard = computer.videoCard.first()
+
+                if existing_videoCard:
+                    existing_videoCard.name = field_value
+                    existing_videoCard.save()
+                else:
+                    videoCard = VideoCard(name=field_value)
+                    
+                    videoCard.save()
+                    computer.videoCard.add(videoCard)
+                                           
+
+            elif field_name =='typeDB_Version' or field_name == 'typeDB_Type':
+
+                existing_typeDB = computer.typeDB.first()
+                print(field_name)
+                if existing_typeDB:
+                    # Если запись существует, обновляем её
+                    if field_name == 'typeDB_Type':
+                        existing_typeDB.type = field_value
+                        print(existing_typeDB)
+                    elif field_name == 'typeDB_Version':
+                        existing_typeDB.version = field_value
+
+                    existing_typeDB.save()
+                else:
+                    # Если записи нет, создаем новую
+                    if field_name == 'typeDB_Type':
+                        typeDB = TypeDB(type=field_value)
+                    elif field_name == 'typeDB_Version':
+                        typeDB = TypeDB(version=field_value)
+
+                    typeDB.save()
+                    computer.typeDB.add(typeDB)
+
+
+                
             elif field_name == 'LANcard':
                 
                 lanCard, created = LANcard.objects.get_or_create(type=lanCard_parts[0], series=lanCard_parts[1])

@@ -72,25 +72,66 @@
 
 <script>
   $(document).ready(function(){
-      $('#addUserBtn').click(function(){
-          var newUserRow = $('.user-row:first').clone();
-          newUserRow.find('input').val('');
-          newUserRow.find('select').val('');
-          newUserRow.insertAfter('.user-row:last');
+    $('#addUserBtn').click(function(){
+      var newUserRow = $('.user-row:first').clone();
+      
+      // Удаляем значения и идентификаторы
+      newUserRow.find('input').each(function(){
+        $(this).val('');
+        $(this).removeAttr('id');
       });
+      
+      // Обновляем идентификаторы для datalist
+      newUserRow.find('datalist').each(function(index){
+        var newId = 'userList_' + new Date().getTime() + '_' + index;
+        $(this).attr('id', newId);
+        $(this).find('option').each(function(){
+          $(this).removeAttr('value');
+        });
+      });
+      
+      // Обновляем идентификаторы для input
+      newUserRow.find('input').each(function(){
+        var newId = 'input_' + new Date().getTime() + '_' + Math.random().toString(36).substring(7);
+        $(this).attr('id', newId);
+      });
+  
+      newUserRow.insertAfter('.user-row:last');
     });
-
+  });
+  
       
 </script>
 <script>
   $(document).ready(function(){
-      $('#addSettingsBtn').click(function(){
-        var newSettingsRow = $('.add-settings:first').clone();
-        newSettingsRow.find('input').val('');
-        newSettingsRow.find('select').val('');
-        newSettingsRow.insertAfter('.add-settings:last');
+    $('#addSettingsBtn').click(function(){
+      var newSettingsRow = $('.add-settings:first').clone();
+      
+      // Удаляем значения и идентификаторы
+      newSettingsRow.find('input').each(function(){
+        $(this).val('');
+        $(this).removeAttr('id');
       });
+  
+      // Обновляем идентификаторы для datalist
+      newSettingsRow.find('datalist').each(function(index){
+        var newId = 'addSettingList_' + new Date().getTime() + '_' + index;
+        $(this).attr('id', newId);
+        $(this).find('option').each(function(){
+          $(this).removeAttr('value');
+        });
+      });
+  
+      // Обновляем идентификаторы для input
+      newSettingsRow.find('input').each(function(){
+        var newId = 'input_' + new Date().getTime() + '_' + Math.random().toString(36).substring(7);
+        $(this).attr('id', newId);
+      });
+  
+      newSettingsRow.insertAfter('.add-settings:last');
     });
+  });
+  
 
 </script>
 
@@ -377,10 +418,10 @@
                   <div class="form-group">
                     <label>User type</label>
 
-                    <input list="userList" id="usersInput_{{ user.pk }}" name="user_type_{{ user.pk }}" class="form-control" 
+                    <input list="userList_{{ user.pk }}" id="usersInput_{{ user.pk }}" name="user_type_{{ user.pk }}" class="form-control" 
                        value="{{ user.user_type }}" placeholder="User type" 
                        style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
-                    <datalist id="userList">
+                    <datalist id="userList_{{ user.pk }}">
                         {% for choice in user_types %}
                             <option value="{{ choice }}">
                         {% endfor %}       
@@ -589,7 +630,7 @@
                       <div class="form-group">
                           <label>Windows</label>
 
-                          <input list="windowsList" id="windowsInput" name="Windows" class="form-control" 
+                          <input list="windowsList" id="windowsInput" name="windows_name" class="form-control" 
                           value="{{ form.windows_name.value }}" placeholder="Windows" 
                           style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
                           <datalist id="windowsList">
@@ -603,7 +644,7 @@
                   <div class="row-sm-4">                    
                       <div class="form-group">
                           <label>License number</label>
-                          <input type="text" class="form-control" placeholder="License number" name="licenseNumber" 
+                          <input type="text" class="form-control" placeholder="License number" name="windows_licenseNumber" 
                                  value="{{ form.windows_licenseNumber.value }}" 
                                  data-inputmask="'mask': '*****-***-***-***'">
                       </div>
@@ -611,7 +652,7 @@
                   <div class="row-sm-4">                    
                       <div class="form-group">
                           <label>License keys</label>
-                          <input type="text" class="form-control" placeholder="License keys" name="licenseKeys" 
+                          <input type="text" class="form-control" placeholder="License keys" name="windows_licenseKeys" 
                                  value="{{ form.windows_licenseKeys.value }}" 
                                  data-inputmask="'mask': '*****-*****-*****-*****-*****'">
                       </div>
@@ -623,7 +664,7 @@
                 <div class="row-sm-4">
                   <div class="form-group">
                     <label>Database type</label>
-                    <input list="typeDBList" id="typeDBsInput" name="typeDB" class="form-control" 
+                    <input list="typeDBList" id="typeDBsInput" name="typeDB_Type" class="form-control" 
                           value="{{ form.typeDB_type.value }}" placeholder="Type database" 
                           style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
                       <datalist id="typeDBList">
@@ -639,7 +680,7 @@
                   <div class="form-group">
                     <label>Database version</label>
                    
-                        <input type="text" class="form-control" placeholder="Database version" name="versionDB" value="{{ form.typeDB_version.value }}" >                   
+                        <input type="text" class="form-control" placeholder="Database version" name="typeDB_Version" value="{{ form.typeDB_version.value }}" >                   
                  
                   </div>
                 </div>
