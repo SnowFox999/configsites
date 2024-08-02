@@ -525,6 +525,8 @@ def save_computer_data(request):
         field_name = request.POST.get('field_name')
         field_value = request.POST.get('field_value')
         computer_id = request.POST.get('computer_id')
+        
+        
 
         # Отладочный вывод
         print("Received data:", field_name, field_value, computer_id)
@@ -546,6 +548,24 @@ def save_computer_data(request):
                     computer.type = ''
                     computer.custom_type = field_value
 
+            elif field_name == 'customer_name':
+                if computer.customer:
+                    computer.customer.name = field_value
+                    computer.customer.save()
+                else:
+                    customer = Customer(name=field_value)
+                    customer.save()
+                    computer.customer = customer
+
+            elif field_name == 'employee_name':
+                if computer.employee:
+                    computer.employee.name = field_value
+                    computer.employee.save()
+                else:
+                    employee = Employee(name=field_value)
+                    employee.save()
+                    computer.employee = employee
+
 
             elif field_name == 'locations_name':
                 existing_location = computer.locations.first()
@@ -558,7 +578,50 @@ def save_computer_data(request):
                     
                     location.save()
                     computer.locations.add(location)
-                
+
+            elif field_name == 'serial_number':
+                computer.serial_number = field_value
+
+
+            elif field_name.startswith('user_type_') or field_name.startswith('user_name_') or field_name.startswith('password_'):
+                user_id = field_name.split('_')[-1]
+                is_new_user = request.POST.get('new_user') == 'true'
+
+                if is_new_user:
+                    user_type = request.POST.get('user_type_' + user_id)
+                    user_name = request.POST.get('user_name_' + user_id)
+                    user_password = request.POST.get('password_' + user_id)
+
+                    if not user_type or not user_name or not user_password:
+                        return JsonResponse({'status': 'error', 'message': 'All fields must be filled for new user'}, status=400)
+
+                    new_user = UserName(user_type=user_type, login=user_name, password=user_password)
+                    new_user.save()
+                    computer.user.add(new_user)
+                else:
+                    try:
+                        user = UserName.objects.get(id=user_id)
+                        if field_name.startswith('user_type_'):
+                            user.user_type = field_value
+                        elif field_name.startswith('user_name_'):
+                            user.login = field_value
+                        elif field_name.startswith('password_'):
+                            user.password = field_value
+                        user.save()
+                    except UserName.DoesNotExist:
+                        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+
+
+
+            elif field_name == 'comment_text':
+                computer.addComment = field_value
+            
+            elif field_name == 'devices_text':
+                computer.addDevices = field_value
+
+            elif field_name == 'software_text':
+                computer.addSoftware = field_value
 
 
             elif field_name == 'diskPlace':
@@ -738,18 +801,30 @@ def save_computer_data(request):
 
 
                 
-            elif field_name == 'LANcard':
+            elif field_name == 'lanCard_type' or field_name =='lanCard_series':
+                existing_lanCard = computer.lanCard.first()
+
+                if existing_lanCard:
+                    # Если запись существует, обновляем её
+                    if field_name == 'lanCard_type':
+                        existing_lanCard.type = field_value
+                    elif field_name == 'lanCard_series':
+                        existing_lanCard.series = field_value
+
+                    existing_lanCard.save()
+                else:
+                    # Если записи нет, создаем новую
+                    if field_name == 'lanCard_type':
+                        lanCard = LANcard(type=field_value)
+                    elif field_name == 'lanCard_series':
+                        lanCard = LANcard(series=field_value)
+
+                    lanCard.save()
+                    computer.lanCard.add(lanCard)
+
                 
-                lanCard, created = LANcard.objects.get_or_create(type=lanCard_parts[0], series=lanCard_parts[1])
-                computer.lanCard.set([lanCard])
-            elif field_name == 'date':
-                try:
-                    date_obj = parse_date(field_value)
-                    if date_obj is None:
-                        raise ValueError("Invalid date format")
-                    computer.date = date_obj
-                except ValueError:
-                    return JsonResponse({'status': 'error', 'message': 'Invalid date format. Use "YYYY-MM-DD".'}, status=400)
+         
+            
 
 
 
@@ -761,6 +836,16 @@ def save_computer_data(request):
                     return JsonResponse({'status': 'error', 'message': 'Invalid field name'}, status=400)
 
             computer.save()
+
+            
+            
+            current_date = timezone.now().date()
+            if computer.date != current_date:
+                computer.date = current_date
+                computer.save()
+                return JsonResponse({'status': 'success', 'date': current_date.strftime('%b %d, %Y')})
+
+
             return JsonResponse({'status': 'success'})
         except ValidationError as e:
             return JsonResponse({'status': 'error', 'message': f'Validation error: {e}'}, status=400)
@@ -771,43 +856,21 @@ def save_computer_data(request):
 
 
 
-    # if request.method == 'POST':
-    #     field_name = request.POST.get('field_name')
-    #     field_value = request.POST.get('field_value')
-    #     computer_id = request.POST.get('computer_id')
-
-    #     print("Received data:", field_name, field_value, computer_id)
-
-    #     if field_name and field_value and computer_id:
-    #         try:
-    #             computer = Computer.objects.get(id=computer_id)
-    #             if field_name in [field.name for field in Computer._meta.get_fields()]:
-    #                 # Обработка полей ManyToMany
-    #                 if field_name in ['diskPlace', 'addSettings']:  # Замените на ваши поля ManyToMany
-    #                     if field_name == 'diskPlace':
-    #                         diskPlace, created = DiskPlace.objects.get_or_create(name=field_value)
-    #                         computer.diskPlace.set([diskPlace])
-    #                     elif field_name == 'addSettings':
-    #                         addSettings, created = AdditionalSettings.objects.get_or_create(name=field_value)
-    #                         computer.addSettings.set([addSettings])
-    #                 else:
-    #                     # Обработка обычных полей
-    #                     setattr(computer, field_name, field_value)
-    #                 computer.save()
-    #                 return JsonResponse({'status': 'success'})
-    #             else:
-    #                 return JsonResponse({'status': 'error', 'message': 'Invalid field name'}, status=400)
-    #         except Computer.DoesNotExist:
-    #             return JsonResponse({'status': 'error', 'message': 'Computer not found'}, status=400)
-        
-    #     return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
-    # else:
-    #     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+   
 
 
+def get_computer_date(request):
+    computer_id = request.GET.get('computer_id')
+    if not computer_id:
+        return JsonResponse({'status': 'error', 'message': 'Missing computer_id'}, status=400)
 
+    try:
+        computer = Computer.objects.get(id=computer_id)
+    except Computer.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Computer not found'}, status=404)
 
-
+    formatted_date = format(computer.date, "%B %d, %Y")
+    return JsonResponse({'status': 'success', 'date': formatted_date})
 
 
 

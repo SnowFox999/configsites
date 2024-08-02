@@ -80,28 +80,50 @@
         $(this).val('');
         $(this).removeAttr('id');
       });
+
+      // Удаляем старые скрытые поля
+      newUserRow.find('input[type="hidden"]').remove();
       
+      // Добавляем скрытое поле для нового пользователя
+      $('<input>').attr({
+        type: 'hidden',
+        name: 'new_user',
+        value: 'true'
+      }).appendTo(newUserRow);
+
+      // Обновляем имена полей
+      var uniqueId = new Date().getTime();
+      newUserRow.find('input').each(function(){
+        var name = $(this).attr('name');
+        if (name) {
+          var newName = name.replace(/\d+$/, uniqueId);
+          $(this).attr('name', newName);
+        }
+      });
+
       // Обновляем идентификаторы для datalist
       newUserRow.find('datalist').each(function(index){
-        var newId = 'userList_' + new Date().getTime() + '_' + index;
+        var newId = 'userList_' + uniqueId + '_' + index;
         $(this).attr('id', newId);
         $(this).find('option').each(function(){
           $(this).removeAttr('value');
         });
       });
-      
+
       // Обновляем идентификаторы для input
       newUserRow.find('input').each(function(){
-        var newId = 'input_' + new Date().getTime() + '_' + Math.random().toString(36).substring(7);
+        var newId = 'input_' + uniqueId + '_' + Math.random().toString(36).substring(7);
         $(this).attr('id', newId);
       });
-  
+
       newUserRow.insertAfter('.user-row:last');
     });
   });
-  
-      
 </script>
+
+
+
+
 <script>
   $(document).ready(function(){
     $('#addSettingsBtn').click(function(){
@@ -199,34 +221,8 @@
   });
 </script>
 
-<script>
-  $(document).ready(function() {
-    $('#save-btn').on('click', function(event) {
-        event.preventDefault();  // предотвращает стандартное действие формы
 
-        let form = $('form')[0];  // Предполагается, что на странице одна форма
-        let formData = new FormData(form);
 
-        formData.append('status', $('input[name="options"]:checked').parent().text().trim());
-
-        $.ajax({
-            url: '{% url "edit" computer_id=computer.id %}',  // URL для отправки данных
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: {'X-CSRFToken': csrftoken}, 
-            success: function(response) {
-                alert('Changes saved successfully!');
-            },
-            error: function(xhr, status, error) {
-                alert('An error occurred: ' + xhr.responseText);
-            }
-        });
-    });
-});
-
-</script>
 
 <script>
   $(document).ready(function() {
@@ -247,9 +243,10 @@
 
       const csrftoken = getCookie('csrftoken');
 
-      $('input').on('blur', function() {
-          var inputName = $(this).attr('name');
-          var inputValue = $(this).val();
+      // Function to handle the change event
+      function handleChangeEvent() {
+          var fieldName = $(this).attr('name');
+          var fieldValue = $(this).val();
           var computerId = {{ computer.id }};
 
           $.ajax({
@@ -257,20 +254,29 @@
               method: 'POST',
               headers: { 'X-CSRFToken': csrftoken },
               data: {
-                  'field_name': inputName,
-                  'field_value': inputValue,
+                  'field_name': fieldName,
+                  'field_value': fieldValue,
                   'computer_id': computerId,
-              },
-              success: function(response) {
-                  console.log('Field ' + inputName + ' saved successfully');
-              },
-              error: function(xhr, status, error) {
-                  console.error('Error saving field ' + inputName + ': ' + error);
               }
+          }).done(function(response) {
+              console.log('Field ' + fieldName + ' saved successfully');
+              if (response.status === 'success' && response.date) {
+                  $('#date-field').val(response.date);
+                  console.log('Date updated successfully');
+              }
+          }).fail(function(xhr, status, error) {
+              console.error('Error saving field ' + fieldName + ': ' + error);
           });
-      });
+      }
+
+      // Attach event handlers to input, textarea, and select elements
+      $('input, textarea, select').on('change blur', handleChangeEvent);
   });
-</script>
+</script> 
+
+
+
+
   
   
 
@@ -300,7 +306,7 @@
       
       <!-- Default box -->
       <div class="card">
-        <div class="card-header" style="display: flex; justify-content: space-between;">
+        <div class="card-header " style="display: flex; justify-content: space-between;">
           <div style="display: flex; align-items: center;">
               <a href="{% url 'order_list' %}" class="btn btn-primary" style="margin-right: 10px;">Back</a>
               
@@ -308,7 +314,7 @@
               
           </div>
           
-          <div class="ml-auto" style="display: flex; align-items: center;">                    
+          <div class="ml-auto track-changes" style="display: flex; align-items: center;">                    
             <div class="btn-group btn-group-toggle" data-toggle="buttons" style="justify-content: flex-end;">
                 <label class="btn btn-outline-danger" id="btn-progress">
                     <input type="radio" name="options" autocomplete="off"> Progress
@@ -343,7 +349,7 @@
               <div class="row">
                 <div class="col-sm-4">
                   <!-- textarea -->
-                  <div class="form-group">
+                  <div class="form-group track-changes">
                     <label>Customer name</label>
                     <input list="customerList" id="customerInput" name="customer_name" class="form-control" value="{{ form.customer_name.value }}" placeholder="Customer name" style="width: 100%">
                     <datalist id="customerList">
@@ -356,7 +362,7 @@
                   </div>
                 </div>
                 <div class="col-sm-4">
-                  <div class="form-group">
+                  <div class="form-group track-changes">
                     <label>Placement</label>
                     <input list="locationList" id="locationInput" name="locations_name" class="form-control" 
                           value="{{ form.location_name.value }}" placeholder="Placement" 
@@ -371,7 +377,7 @@
                   </div>
                 </div>
                 <div class="col-sm-4">
-                  <div class="form-group">
+                  <div class="form-group track-changes">
                     <label>Computer type</label>
                     <input list="computerTypeList" id="computerTypeInput" name="ComputerType" class="form-control" 
                           value="{{ form.computer_type.value }}" 
@@ -396,13 +402,13 @@
   <div class="col-sm-8">   
       <div class="row">
         <div class="col-sm-6">
-            <div class="form-group">
+            <div class="form-group track-changes">
                 <label>Computer name</label>
                 <input type="text" class="form-control" placeholder="Name" name="computer_name" value="{{ computer.name }}">
             </div>
         </div>
         <div class="col-sm-6">
-          <div class="form-group">
+          <div class="form-group track-changes">
             <label>Computer series number</label>
             <input type="text" class="form-control" placeholder="Series number" name="serial_number" value="{{ computer.serial_number }}" >
           </div>
@@ -412,55 +418,48 @@
 
       {% if users %}
       {% for user in users %}
-      <div class="row user-row">
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>User type</label>
-
-                    <input list="userList_{{ user.pk }}" id="usersInput_{{ user.pk }}" name="user_type_{{ user.pk }}" class="form-control" 
-                       value="{{ user.user_type }}" placeholder="User type" 
-                       style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
-                    <datalist id="userList_{{ user.pk }}">
-                        {% for choice in user_types %}
-                            <option value="{{ choice }}">
-                        {% endfor %}       
-                    </datalist>
-                 
-                </div>
-                
-                </div>
-                <div class="col-sm-4">
-                    <div class="form-group">
-                        <label>User name</label>
-                        <input type="text" class="form-control" name="user_name_{{ user.pk }}" placeholder="User name" value="{{ user.login }}">
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                  <div class="form-group">
-                      <label>User password</label>
-                      <input type="text" class="form-control" name="password_{{ user.pk }}" placeholder="User password" value="{{ user.password }}">
-                  </div>
+      <div class="row user-row" data-user-id="{{ user.pk }}">
+          <div class="col-sm-2">
+              <div class="form-group track-changes">
+                  <label>User type</label>
+                  <input list="userList_{{ user.pk }}" id="usersInput_{{ user.pk }}" name="user_type_{{ user.pk }}" class="form-control" value="{{ user.user_type }}" placeholder="User type" style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                  <datalist id="userList_{{ user.pk }}">
+                      {% for choice in user_types %}
+                      <option value="{{ choice }}">
+                      {% endfor %}       
+                  </datalist>
               </div>
-  
+          </div>
+          <div class="col-sm-4">
+              <div class="form-group track-changes">
+                  <label>User name</label>
+                  <input type="text" class="form-control" name="user_name_{{ user.pk }}" placeholder="User name" value="{{ user.login }}">
+              </div>
+          </div>
+          <div class="col-sm-6">
+              <div class="form-group track-changes">
+                  <label>User password</label>
+                  <input type="text" class="form-control" name="password_{{ user.pk }}" placeholder="User password" value="{{ user.password }}">
+              </div>
+          </div>
       </div>
+
       {% endfor %}
       {% endif %}
-    
-    
 
-        <div class="row">
+      <div class="row">
           <button type="button" id="addUserBtn" class="btn btn-primary">Add user</button>
-        </div>
+      </div>
+
       </div>
 
 
 
         <div class="col-sm-4">
-            <div class="form-group">
+            <div class="form-group track-changes">
                 <label>Comment</label>
                 
-                <textarea class="form-control" rows="3" placeholder="Add a comment" >{{ form.addComment_value.value }}</textarea>
+                <textarea class="form-control" name="comment_text" rows="3" placeholder="Add a comment" >{{ form.addComment_value.value }}</textarea>
             </div>
         </div>
     </div>
@@ -487,7 +486,7 @@
               <div class="row">               
                 <div class="col-sm-4">
                   <div class="row-sm-4">
-                    <div class="form-group">
+                    <div class="form-group track-changes">
                       <label>Processor</label>
                       <input list="processorList" id="processorsInput" name="Processor" class="form-control" 
                           value="{{ form.processor_name.value }}" placeholder="Processor" 
@@ -501,7 +500,7 @@
                      </div>
                   </div>
                   <div class="row-sm-4">                    
-                    <div class="form-group">
+                    <div class="form-group track-changes">
                       <label>Video card</label>
 
                       <input list="videoCardList" id="videoCardsInput" name="videoCard" class="form-control" 
@@ -522,10 +521,10 @@
  
                 <div class="col-sm-4">
                   <div class="row-sm-4">
-                    <div class="form-group">
+                    <div class="form-group track-changes">
                       <label>LAN card</label>
 
-                      <input list="lanCardList" id="lanCardsInput" name="lanCard" class="form-control" 
+                      <input list="lanCardList" id="lanCardsInput" name="lanCard_type" class="form-control" 
                           value="{{ form.lanCard_type.value }}" placeholder="LAN card" 
                           style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
                       <datalist id="lanCardList">
@@ -540,9 +539,9 @@
                   
                   </div>
                   <div class="row-sm-4">
-                    <div class="form-group">
+                    <div class="form-group track-changes">
                       <label>LAN card series</label>
-                      <input type="text" class="form-control" placeholder="LAN series" name="lanSeries" 
+                      <input type="text" class="form-control" placeholder="LAN series" name="lanCard_series" 
                       value="{{ form.lanCard_series.value }}">
                       
                       </div>
@@ -553,7 +552,7 @@
                 <div class="col-sm-4">
                   <div class="row">
                     <div class="col-sm-3">
-                      <div class="form-group">
+                      <div class="form-group track-changes">
                         <label>RAM GB</label>
                         <select class="form-control select" name="ram_gigabytes"  style="width: 100%;">   
                           {% for choice in ram_gigabytes %}                
@@ -566,7 +565,7 @@
                       </div>
                     </div>
                     <div class="col-sm-9">
-                      <div class="form-group">
+                      <div class="form-group track-changes">
                         <label>RAM type</label>
 
                         <input list="ramList" id="ramsInput" name="ram_type" class="form-control" 
@@ -585,7 +584,7 @@
                   </div>
                   <div class="row">
                     <div class="col-sm-3">
-                      <div class="form-group">
+                      <div class="form-group track-changes">
                         <label>Disk GB</label>
                         <select class="form-control select" name="disk_gigabytes" style="width: 100%;">
                           {% for choice in hardDisk_gigabytes %}
@@ -595,7 +594,7 @@
                       </div>
                     </div>
                     <div class="col-sm-9">
-                      <div class="form-group">
+                      <div class="form-group track-changes">
                         <label>Hard disk type</label>
 
                         <input list="hardDiskList" id="hardDisksInput" name="disk_type" class="form-control" 
@@ -627,7 +626,7 @@
             <div class="row">               
               <div class="col-sm-4">
                   <div class="row-sm-4">
-                      <div class="form-group">
+                      <div class="form-group track-changes">
                           <label>Windows</label>
 
                           <input list="windowsList" id="windowsInput" name="windows_name" class="form-control" 
@@ -642,7 +641,7 @@
                       </div>
                   </div>
                   <div class="row-sm-4">                    
-                      <div class="form-group">
+                      <div class="form-group track-changes">
                           <label>License number</label>
                           <input type="text" class="form-control" placeholder="License number" name="windows_licenseNumber" 
                                  value="{{ form.windows_licenseNumber.value }}" 
@@ -650,7 +649,7 @@
                       </div>
                   </div>            
                   <div class="row-sm-4">                    
-                      <div class="form-group">
+                      <div class="form-group track-changes">
                           <label>License keys</label>
                           <input type="text" class="form-control" placeholder="License keys" name="windows_licenseKeys" 
                                  value="{{ form.windows_licenseKeys.value }}" 
@@ -662,7 +661,7 @@
 
               <div class="col-sm-4">
                 <div class="row-sm-4">
-                  <div class="form-group">
+                  <div class="form-group track-changes">
                     <label>Database type</label>
                     <input list="typeDBList" id="typeDBsInput" name="typeDB_Type" class="form-control" 
                           value="{{ form.typeDB_type.value }}" placeholder="Type database" 
@@ -677,7 +676,7 @@
                   </div>
                 </div>
                 <div class="row-sm-4">
-                  <div class="form-group">
+                  <div class="form-group track-changes">
                     <label>Database version</label>
                    
                         <input type="text" class="form-control" placeholder="Database version" name="typeDB_Version" value="{{ form.typeDB_version.value }}" >                   
@@ -688,10 +687,10 @@
 
 
               <div class="col-sm-4">
-                <div class="form-group">
+                <div class="form-group track-changes">
                   <label>Additional software</label>
                   
-                  <textarea class="form-control" rows="3" placeholder="Add a software" >{{ form.addSoftware_value.value }}</textarea>
+                  <textarea class="form-control" rows="3" name="software_text" placeholder="Add a software" >{{ form.addSoftware_value.value }}</textarea>
                 </div>
               </div>                
             </div>
@@ -709,7 +708,7 @@
 
             <div class="row">
               <div class="col-sm-4">
-                  <div class="form-group">
+                  <div class="form-group track-changes">
                       <label>Monitor</label>
                       <input list="monitorList" id="monitorInput" name="MonitorName" class="form-control" 
                       value="{{ form.monitor_name.value }}" placeholder="Select monitor" style="width: 100%" >
@@ -732,7 +731,7 @@
 
               <div class="col-sm-4">
                 
-                  <div class="form-group">
+                  <div class="form-group track-changes">
                     <label>DVD / CD</label>
                     <input type="text" class="form-control" placeholder="DVD / CD" name="diskPlace" 
                                  value="{{ form.diskPlace_name.value }}" 
@@ -745,9 +744,9 @@
 
 
               <div class="col-sm-4">
-                <div class="form-group">
+                <div class="form-group track-changes">
                   <label>Additional devices</label>
-                  <textarea class="form-control" rows="3" placeholder="Add a devices" >{{ form.addDevices_value.value }}</textarea>
+                  <textarea class="form-control" rows="3" name="devices_text" placeholder="Add a devices" >{{ form.addDevices_value.value }}</textarea>
                 </div>
               </div>                
             </div>
@@ -759,7 +758,7 @@
               <div class="row add-settings">               
                 <div class="col-sm-4">
                   
-                    <div class="form-group">
+                    <div class="form-group track-changes">
                       <label>Additional settings</label>
                       <input list="addSettingList" id="addSettingsInput" name="addSettings_name" class="form-control" 
                           value="{{ form.addSettings_name.value }}" placeholder="Additional settings" 
@@ -778,10 +777,10 @@
 
                 <div class="col-sm-4">
                   
-                    <div class="form-group">
+                    <div class="form-group track-changes">
                       <label>Additional settings</label>
                       
-                        <input type="text" class="form-control mb-3" placeholder="Additional settings" name="addSettings_text" value="{{ form.addSettings_text.value }}">                   
+                        <input type="text" class="form-control mb-3 " placeholder="Additional settings" name="addSettings_text" value="{{ form.addSettings_text.value }}">                   
                     
                     </div>
                   
@@ -808,7 +807,7 @@
                           <div class="input-group-prepend">
                             <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                             </div>
-                            <input type="text" class="form-control" name="date"  value="{{ form.date.value }}">
+                            <input type="text" id="date-field" class="form-control track-changes" name="date_value"  value="{{ form.date.value }}">
                       </div>
                       </div>
                     
@@ -817,7 +816,7 @@
 
                   <div class="col-sm-4">
                     
-                    <div class="form-group">
+                    <div class="form-group track-changes">
                       <label>Employee</label>
                       <input list="employeeList" id="employeeInput" name="employee_name" class="form-control" value="{{ form.employee_name.value }}" placeholder="Employee name" style="width: 100%">
                     <datalist id="employeeList">
@@ -840,7 +839,7 @@
             </form>
 
 
-            
+      
 
             <script>
               $(document).ready(function() {              
