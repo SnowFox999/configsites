@@ -869,6 +869,29 @@ def save_computer_data(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 
+@csrf_exempt
+def delete_user(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        try:
+            user = UserName.objects.get(id=user_id)
+            user.delete()
+            return JsonResponse({'status': 'success'})
+        except UserName.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'User not found'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+@csrf_exempt
+def delete_setting(request):
+    if request.method == 'POST':
+        setting_id = request.POST.get('setting_id')
+        try:
+            setting = AdditionalSettings.objects.get(id=setting_id)
+            setting.delete()
+            return JsonResponse({'status': 'success'})
+        except AdditionalSettings.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Setting not found'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
    
 

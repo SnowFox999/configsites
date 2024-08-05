@@ -284,7 +284,44 @@
         });
         newSettingsRow.insertAfter('.add-settings:last');
     });
+
+    // Обработчики событий для кнопок удаления
+    $(document).on('click', '.delete-user-btn', function() {
+        var userId = $(this).data('user-id');
+        var $row = $(this).closest('.user-row');
+        $.ajax({
+            url: "{% url 'delete_user' %}",
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken },
+            data: { 'user_id': userId }
+        }).done(function(response) {
+            if (response.status === 'success') {
+                $row.remove();
+            }
+        }).fail(function(xhr, status, error) {
+            console.error('Error deleting user: ' + error);
+        });
+    });
+
+    $(document).on('click', '.delete-setting-btn', function() {
+        var settingId = $(this).data('setting-id');
+        var $row = $(this).closest('.add-settings');
+        $.ajax({
+            url: "{% url 'delete_setting' %}",
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken },
+            data: { 'setting_id': settingId }
+        }).done(function(response) {
+            if (response.status === 'success') {
+                $row.remove();
+            }
+        }).fail(function(xhr, status, error) {
+            console.error('Error deleting setting: ' + error);
+        });
+    });
 });
+
+
 
 </script>
 
@@ -436,35 +473,41 @@
 
 
       {% if users %}
-      {% for user in users %}
-      <div class="row user-row" data-user-id="{{ user.pk }}">
-          <div class="col-sm-2">
-              <div class="form-group track-changes">
-                  <label>User type</label>
-                  <input list="userList_{{ user.pk }}" id="usersInput_{{ user.pk }}" name="user_type_{{ user.pk }}" class="form-control" value="{{ user.user_type }}" placeholder="User type" style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
-                  <datalist id="userList_{{ user.pk }}">
-                      {% for choice in user_types %}
-                      <option value="{{ choice }}">
-                      {% endfor %}       
-                  </datalist>
-              </div>
-          </div>
-          <div class="col-sm-4">
-              <div class="form-group track-changes">
-                  <label>User name</label>
-                  <input type="text" class="form-control" name="user_name_{{ user.pk }}" placeholder="User name" value="{{ user.login }}">
-              </div>
-          </div>
-          <div class="col-sm-6">
-              <div class="form-group track-changes">
-                  <label>User password</label>
-                  <input type="text" class="form-control" name="password_{{ user.pk }}" placeholder="User password" value="{{ user.password }}">
-              </div>
-          </div>
-      </div>
-
-      {% endfor %}
-      {% endif %}
+    {% for user in users %}
+    <div class="row user-row" data-user-id="{{ user.pk }}">
+        <div class="col-sm-2">
+            <div class="form-group track-changes">
+                <label>User type</label>
+                <input list="userList_{{ user.pk }}" id="usersInput_{{ user.pk }}" name="user_type_{{ user.pk }}" class="form-control" value="{{ user.user_type }}" placeholder="User type" style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                <datalist id="userList_{{ user.pk }}">
+                    {% for choice in user_types %}
+                    <option value="{{ choice }}">
+                    {% endfor %}       
+                </datalist>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group track-changes">
+                <label>User name</label>
+                <input type="text" class="form-control" name="user_name_{{ user.pk }}" placeholder="User name" value="{{ user.login }}">
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-10">
+                    <div class="form-group track-changes">
+                        <label>User password</label>
+                        <input type="text" class="form-control" name="password_{{ user.pk }}" placeholder="User password" value="{{ user.password }}">
+                    </div>
+                </div>
+                <div class="col-sm-2 text-right" style="display: flex; align-items: center;">
+                    <button type="button" class="btn btn-link delete-user-btn text-danger p-0" data-user-id="{{ user.id }}" style="height: 100%;">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
 
       <div id="new-users-container"></div>
 
@@ -778,7 +821,7 @@
   
     {% if addSettings_queryset %}    
     {% for addSettings in addSettings_queryset%}         
-              <div class="row add-settings">               
+              <div class="row add-settings" data-setting-id="{{ addSettings.id}}">               
                 <div class="col-sm-4">
                   
                     <div class="form-group track-changes">
@@ -800,17 +843,28 @@
 
                 <div class="col-sm-4">
                   
+                  
                     <div class="form-group track-changes">
                       <label>Additional settings</label>
                       
                         <input type="text" class="form-control mb-3 " placeholder="Additional settings" name="addSettings_text_{{ addSetting.id }}" value="{{ addSettings.text }}">                   
                     
                     </div>
-                  
+                  </div>
+                  <div class="col-sm-2 text-left">
+                    <button type="button" class="btn btn-link delete-setting-btn text-danger p-0" data-setting-id="{{ addSettings.id }}" style="height: 100%;">Delete</button>
                 </div>
               </div>
+            
+            
+              
     {% endfor %}
     {% endif %}
+
+    
+
+
+
 
     <div id="new-settings-container"></div>
 

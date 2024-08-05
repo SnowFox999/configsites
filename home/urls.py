@@ -15,4 +15,6 @@ urlpatterns = [
     path('update_computer_status/<int:computer_id>/', update_computer_status, name='update_computer_status'),
     path('save_computer_data/', save_computer_data, name='save_computer_data'),
     path('get_computer_date/', get_computer_date, name='get_computer_date'),
+    path('delete_user/', views.delete_user, name='delete_user'),
+    path('delete_setting/', views.delete_setting, name='delete_setting'),
 ] 
