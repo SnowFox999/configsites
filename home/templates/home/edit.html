@@ -175,7 +175,7 @@
 
 
 
-{% comment %} <script>
+<script>
   $(document).ready(function() {
       function getCookie(name) {
           let cookieValue = null;
@@ -193,22 +193,39 @@
       }
 
       const csrftoken = getCookie('csrftoken');
+      let requestInProgress = false;  // Флаг для предотвращения повторных запросов
 
-      // Function to handle the change event
-      function handleChangeEvent() {
+      function handleFieldChange(event) {
+          if (requestInProgress) return;  // Проверка флага
+
+          requestInProgress = true;  // Установка флага
+
           var fieldName = $(this).attr('name');
           var fieldValue = $(this).val();
           var computerId = {{ computer.id }};
+          var $userRow = $(this).closest('.user-row');
+          var isNewUser = $userRow.find('input[name^="new_user_"]').length > 0;
+          var data = {
+              'field_name': fieldName,
+              'field_value': fieldValue,
+              'computer_id': computerId,
+          };
+
+          if (isNewUser) {
+              var newUserData = {
+                  'user_type': $userRow.find('input[name^="user_type_"]').val(),
+                  'user_name': $userRow.find('input[name^="user_name_"]').val(),
+                  'password': $userRow.find('input[name^="password_"]').val(),
+                  'new_user': 'true'
+              };
+              $.extend(data, newUserData);
+          }
 
           $.ajax({
               url: "{% url 'save_computer_data' %}",
               method: 'POST',
               headers: { 'X-CSRFToken': csrftoken },
-              data: {
-                  'field_name': fieldName,
-                  'field_value': fieldValue,
-                  'computer_id': computerId,
-              }
+              data: data
           }).done(function(response) {
               console.log('Field ' + fieldName + ' saved successfully');
               if (response.status === 'success' && response.date) {
@@ -217,108 +234,66 @@
               }
           }).fail(function(xhr, status, error) {
               console.error('Error saving field ' + fieldName + ': ' + error);
+          }).always(function() {
+              requestInProgress = false;  // Сброс флага
           });
       }
 
-      // Attach event handlers to input, textarea, and select elements
-      $('input, textarea, select').on('change blur', handleChangeEvent);
-  });
-</script> {% endcomment %}
+      // Обработка изменения для всех input, textarea и select элементов
+      $(document).on('change blur', 'input, textarea, select', handleFieldChange);
 
+      // Обработка добавления нового пользователя
+      $('#addUserBtn').click(function(){
+          var newUserRow = $('.user-row:first').clone();
+          
+          // Удаляем значения и идентификаторы
+          newUserRow.find('input').each(function(){
+              $(this).val('');
+              $(this).removeAttr('id');
+          });
 
+          // Удаляем старые скрытые поля
+          newUserRow.find('input[type="hidden"]').remove();
+          
+          var uniqueId = new Date().getTime();
 
-<script>
-  $(document).ready(function(){
-    $('#addUserBtn').click(function(){
-      var newUserRow = $('.user-row:first').clone();
-      
-      // Удаляем значения и идентификаторы
-      newUserRow.find('input').each(function(){
-        $(this).val('');
-        $(this).removeAttr('id');
+          // Добавляем скрытое поле для нового пользователя
+          $('<input>').attr({
+              type: 'hidden',
+              name: 'new_user_' + uniqueId,
+              value: 'true'
+          }).appendTo(newUserRow);
+
+          // Обновляем имена полей
+          newUserRow.find('input').each(function(){
+              var name = $(this).attr('name');
+              if (name) {
+                  var newName = name.replace(/\d+$/, uniqueId);
+                  $(this).attr('name', newName);
+              }
+          });
+
+          // Обновляем идентификаторы для datalist
+          newUserRow.find('datalist').each(function(index){
+              var newId = 'userList_' + uniqueId + '_' + index;
+              $(this).attr('id', newId);
+              $(this).find('option').each(function(){
+                  $(this).removeAttr('value');
+              });
+          });
+
+          // Обновляем идентификаторы для input
+          newUserRow.find('input').each(function(){
+              var newId = 'input_' + uniqueId + '_' + Math.random().toString(36).substring(7);
+              $(this).attr('id', newId);
+          });
+
+          newUserRow.insertAfter('.user-row:last');
       });
-
-      // Удаляем старые скрытые поля
-      newUserRow.find('input[type="hidden"]').remove();
-      
-      var uniqueId = new Date().getTime();
-
-      // Добавляем скрытое поле для нового пользователя
-      $('<input>').attr({
-        type: 'hidden',
-        name: 'new_user_' + uniqueId,
-        value: 'true'
-      }).appendTo(newUserRow);
-
-      // Обновляем имена полей
-      newUserRow.find('input').each(function(){
-        var name = $(this).attr('name');
-        if (name) {
-          var newName = name.replace(/\d+$/, uniqueId);
-          $(this).attr('name', newName);
-        }
-      });
-
-      // Обновляем идентификаторы для datalist
-      newUserRow.find('datalist').each(function(index){
-        var newId = 'userList_' + uniqueId + '_' + index;
-        $(this).attr('id', newId);
-        $(this).find('option').each(function(){
-          $(this).removeAttr('value');
-        });
-      });
-
-      // Обновляем идентификаторы для input
-      newUserRow.find('input').each(function(){
-        var newId = 'input_' + uniqueId + '_' + Math.random().toString(36).substring(7);
-        $(this).attr('id', newId);
-      });
-
-      newUserRow.insertAfter('.user-row:last');
-    });
-
-    // Handle changes for all input fields
-    $(document).on('change blur', 'input', function() {
-      var fieldName = $(this).attr('name');
-      var fieldValue = $(this).val();
-      var computerId = {{ computer.id }};
-      var $userRow = $(this).closest('.user-row');
-      var isNewUser = $userRow.find('input[name^="new_user_"]').length > 0;
-      var userId = $userRow.attr('data-user-id');
-
-      var data = {
-        'field_name': fieldName,
-        'field_value': fieldValue,
-        'computer_id': computerId,
-      };
-
-      if (isNewUser) {
-        var newUserData = {
-          'user_type': $userRow.find('input[name^="user_type_"]').val(),
-          'user_name': $userRow.find('input[name^="user_name_"]').val(),
-          'password': $userRow.find('input[name^="password_"]').val(),
-          'new_user': 'true'
-        };
-        $.extend(data, newUserData);
-      }
-
-      $.ajax({
-        url: "{% url 'save_computer_data' %}",
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrftoken },
-        data: data
-      }).done(function(response) {
-        console.log('Field ' + fieldName + ' saved successfully');
-        if (response.status === 'success' && response.date) {
-          $('#date-field').val(response.date);
-          console.log('Date updated successfully');
-        }
-      }).fail(function(xhr, status, error) {
-        console.error('Error saving field ' + fieldName + ': ' + error);
-      });
-    });
   });
 </script>
+
+
 
 
 
@@ -607,7 +582,7 @@
                         <label>RAM GB</label>
                         <select class="form-control select" name="ram_gigabytes"  style="width: 100%;">   
                           {% for choice in ram_gigabytes %}                
-                          <option value="{{ choice }}">{{ choice }}</option>   
+                          <option value="{{ choice }}">{{ form.ram_gigabytes.value }}</option>   
                           {% endfor %}               
                         </select> 
 
@@ -639,7 +614,7 @@
                         <label>Disk GB</label>
                         <select class="form-control select" name="disk_gigabytes" style="width: 100%;">
                           {% for choice in hardDisk_gigabytes %}
-                            <option value="{{ choice }}">{{ choice }}</option>
+                            <option value="{{ choice }}">{{ form.hardDisk_gigabytes.value }}</option>
                           {% endfor %}
                         </select>
                       </div>
