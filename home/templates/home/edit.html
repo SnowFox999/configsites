@@ -75,38 +75,7 @@
 
 
 
-<script>
-  $(document).ready(function(){
-    $('#addSettingsBtn').click(function(){
-      var newSettingsRow = $('.add-settings:first').clone();
-      
-      // Удаляем значения и идентификаторы
-      newSettingsRow.find('input').each(function(){
-        $(this).val('');
-        $(this).removeAttr('id');
-      });
-  
-      // Обновляем идентификаторы для datalist
-      newSettingsRow.find('datalist').each(function(index){
-        var newId = 'addSettingList_' + new Date().getTime() + '_' + index;
-        $(this).attr('id', newId);
-        $(this).find('option').each(function(){
-          $(this).removeAttr('value');
-        });
-      });
-  
-      // Обновляем идентификаторы для input
-      newSettingsRow.find('input').each(function(){
-        var newId = 'input_' + new Date().getTime() + '_' + Math.random().toString(36).substring(7);
-        $(this).attr('id', newId);
-      });
-  
-      newSettingsRow.insertAfter('.add-settings:last');
-    });
-  });
-  
 
-</script>
 
 
 
@@ -177,120 +146,146 @@
 
 <script>
   $(document).ready(function() {
-      function getCookie(name) {
-          let cookieValue = null;
-          if (document.cookie && document.cookie !== '') {
-              const cookies = document.cookie.split(';');
-              for (let i = 0; i < cookies.length; i++) {
-                  const cookie = cookies[i].trim();
-                  if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                      break;
-                  }
-              }
-          }
-          return cookieValue;
-      }
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
-      const csrftoken = getCookie('csrftoken');
-      let requestInProgress = false;  // Флаг для предотвращения повторных запросов
+    const csrftoken = getCookie('csrftoken');
+    let requestInProgress = false;
 
-      function handleFieldChange(event) {
-          if (requestInProgress) return;  // Проверка флага
+    function handleFieldChange(event) {
+        if (requestInProgress) return;
 
-          requestInProgress = true;  // Установка флага
+        requestInProgress = true;
 
-          var fieldName = $(this).attr('name');
-          var fieldValue = $(this).val();
-          var computerId = {{ computer.id }};
-          var $userRow = $(this).closest('.user-row');
-          var isNewUser = $userRow.find('input[name^="new_user_"]').length > 0;
-          var data = {
-              'field_name': fieldName,
-              'field_value': fieldValue,
-              'computer_id': computerId,
-          };
+        var fieldName = $(this).attr('name');
+        var fieldValue = $(this).val();
+        var computerId = {{ computer.id }};
+        var $row = $(this).closest('.user-row, .add-settings');
+        var isNewUser = $row.find('input[name^="new_user_"]').length > 0;
+        var isNewSetting = $row.find('input[name^="new_setting_"]').length > 0;
+        var data = {
+            'field_name': fieldName,
+            'field_value': fieldValue,
+            'computer_id': computerId,
+        };
 
-          if (isNewUser) {
-              var newUserData = {
-                  'user_type': $userRow.find('input[name^="user_type_"]').val(),
-                  'user_name': $userRow.find('input[name^="user_name_"]').val(),
-                  'password': $userRow.find('input[name^="password_"]').val(),
-                  'new_user': 'true'
-              };
-              $.extend(data, newUserData);
-          }
+        if (isNewUser) {
+            var newUserData = {
+                'user_type': $row.find('input[name^="user_type_"]').val(),
+                'user_name': $row.find('input[name^="user_name_"]').val(),
+                'password': $row.find('input[name^="password_"]').val(),
+                'new_user': 'true'
+            };
+            $.extend(data, newUserData);
+        } else if (isNewSetting) {
+            var newSettingData = {
+                'addSettings_name': $row.find('input[name^="addSettings_name_"]').val(),
+                'addSettings_text': $row.find('input[name^="addSettings_text_"]').val(),
+                'new_setting': 'true'
+            };
+            $.extend(data, newSettingData);
+        }
 
-          $.ajax({
-              url: "{% url 'save_computer_data' %}",
-              method: 'POST',
-              headers: { 'X-CSRFToken': csrftoken },
-              data: data
-          }).done(function(response) {
-              console.log('Field ' + fieldName + ' saved successfully');
-              if (response.status === 'success' && response.date) {
-                  $('#date-field').val(response.date);
-                  console.log('Date updated successfully');
-              }
-          }).fail(function(xhr, status, error) {
-              console.error('Error saving field ' + fieldName + ': ' + error);
-          }).always(function() {
-              requestInProgress = false;  // Сброс флага
-          });
-      }
+        $.ajax({
+            url: "{% url 'save_computer_data' %}",
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken },
+            data: data
+        }).done(function(response) {
+            console.log('Field ' + fieldName + ' saved successfully');
+            if (response.status === 'success' && response.date) {
+                $('#date-field').val(response.date);
+                console.log('Date updated successfully');
+            }
+        }).fail(function(xhr, status, error) {
+            console.error('Error saving field ' + fieldName + ': ' + error);
+        }).always(function() {
+            requestInProgress = false;
+        });
+    }
 
-      // Обработка изменения для всех input, textarea и select элементов
-      $(document).on('change blur', 'input, textarea, select', handleFieldChange);
+    $(document).on('change blur', 'input, textarea, select', handleFieldChange);
 
-      // Обработка добавления нового пользователя
-      $('#addUserBtn').click(function(){
-          var newUserRow = $('.user-row:first').clone();
-          
-          // Удаляем значения и идентификаторы
-          newUserRow.find('input').each(function(){
-              $(this).val('');
-              $(this).removeAttr('id');
-          });
+    $('#addUserBtn').click(function() {
+        var newUserRow = $('.user-row:first').clone();
+        newUserRow.find('input').each(function() {
+            $(this).val('');
+            $(this).removeAttr('id');
+        });
+        newUserRow.find('input[type="hidden"]').remove();
+        var uniqueId = new Date().getTime();
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'new_user_' + uniqueId,
+            value: 'true'
+        }).appendTo(newUserRow);
+        newUserRow.find('input').each(function() {
+            var name = $(this).attr('name');
+            if (name) {
+                var newName = name.replace(/\d+$/, uniqueId);
+                $(this).attr('name', newName);
+            }
+        });
+        newUserRow.find('datalist').each(function(index) {
+            var newId = 'userList_' + uniqueId + '_' + index;
+            $(this).attr('id', newId);
+            $(this).find('option').each(function() {
+                $(this).removeAttr('value');
+            });
+        });
+        newUserRow.find('input').each(function() {
+            var newId = 'input_' + uniqueId + '_' + Math.random().toString(36).substring(7);
+            $(this).attr('id', newId);
+        });
+        newUserRow.insertAfter('.user-row:last');
+    });
 
-          // Удаляем старые скрытые поля
-          newUserRow.find('input[type="hidden"]').remove();
-          
-          var uniqueId = new Date().getTime();
+    $('#addSettingsBtn').click(function() {
+        var newSettingsRow = $('.add-settings:first').clone();
+        newSettingsRow.find('input').each(function() {
+            $(this).val('');
+            $(this).removeAttr('id');
+        });
+        var uniqueId = new Date().getTime();
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'new_setting_' + uniqueId,
+            value: 'true'
+        }).appendTo(newSettingsRow);
+        newSettingsRow.find('input').each(function() {
+            var name = $(this).attr('name');
+            if (name) {
+                var newName = name.replace(/\d+$/, uniqueId);
+                $(this).attr('name', newName);
+            }
+        });
+        newSettingsRow.find('datalist').each(function(index) {
+            var newId = 'addSettingList_' + uniqueId + '_' + index;
+            $(this).attr('id', newId);
+            $(this).find('option').each(function() {
+                $(this).removeAttr('value');
+            });
+        });
+        newSettingsRow.find('input').each(function() {
+            var newId = 'input_' + uniqueId + '_' + Math.random().toString(36).substring(7);
+            $(this).attr('id', newId);
+        });
+        newSettingsRow.insertAfter('.add-settings:last');
+    });
+});
 
-          // Добавляем скрытое поле для нового пользователя 11111
-          $('<input>').attr({
-              type: 'hidden',
-              name: 'new_user_' + uniqueId,
-              value: 'true'
-          }).appendTo(newUserRow);
-
-          // Обновляем имена полей
-          newUserRow.find('input').each(function(){
-              var name = $(this).attr('name');
-              if (name) {
-                  var newName = name.replace(/\d+$/, uniqueId);
-                  $(this).attr('name', newName);
-              }
-          });
-
-          // Обновляем идентификаторы для datalist
-          newUserRow.find('datalist').each(function(index){
-              var newId = 'userList_' + uniqueId + '_' + index;
-              $(this).attr('id', newId);
-              $(this).find('option').each(function(){
-                  $(this).removeAttr('value');
-              });
-          });
-
-          // Обновляем идентификаторы для input
-          newUserRow.find('input').each(function(){
-              var newId = 'input_' + uniqueId + '_' + Math.random().toString(36).substring(7);
-              $(this).attr('id', newId);
-          });
-
-          newUserRow.insertAfter('.user-row:last');
-      });
-  });
 </script>
 
 
@@ -780,14 +775,16 @@
     {% endif %}         
                 
  <!-- ADDITIONAL SETTINGS BLOCK--> 
-    {% if addSettings_queryset %}             
+  
+    {% if addSettings_queryset %}    
+    {% for addSettings in addSettings_queryset%}         
               <div class="row add-settings">               
                 <div class="col-sm-4">
                   
                     <div class="form-group track-changes">
                       <label>Additional settings</label>
-                      <input list="addSettingList" id="addSettingsInput" name="addSettings_name" class="form-control" 
-                          value="{{ form.addSettings_name.value }}" placeholder="Additional settings" 
+                      <input list="addSettingList" id="addSettingsInput" name="addSettings_name_{{ addSetting.id }}" class="form-control" 
+                          value="{{ addSettings.name }}" placeholder="Additional settings" 
                           style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
                       <datalist id="addSettingList">
                         {% for addSettings in addSettings_queryset %}
@@ -806,13 +803,18 @@
                     <div class="form-group track-changes">
                       <label>Additional settings</label>
                       
-                        <input type="text" class="form-control mb-3 " placeholder="Additional settings" name="addSettings_text" value="{{ form.addSettings_text.value }}">                   
+                        <input type="text" class="form-control mb-3 " placeholder="Additional settings" name="addSettings_text_{{ addSetting.id }}" value="{{ addSettings.text }}">                   
                     
                     </div>
                   
                 </div>
               </div>
+    {% endfor %}
     {% endif %}
+
+    <div id="new-settings-container"></div>
+
+
     <div class="row">
       <button type="button" id="addSettingsBtn" class="btn btn-primary">Add settings</button>
     </div>

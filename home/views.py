@@ -649,26 +649,30 @@ def save_computer_data(request):
                 
 
 
-            elif field_name == 'addSettings_name' or field_name == 'addSettings_text':
-                existing_add_settings = computer.addSettings.first()
+            elif field_name.startswith('addSettings_name') or field_name.startswith('addSettings_text'):
+                setting_id = field_name.split('_')[-1]
+                is_new_setting = request.POST.get('new_setting') == 'true'
 
-                if existing_add_settings:
-                    # Если запись существует, обновляем её
-                    if field_name == 'addSettings_name':
-                        existing_add_settings.name = field_value
-                    elif field_name == 'addSettings_text':
-                        existing_add_settings.text = field_value
+                if is_new_setting:
+                    setting_name = request.POST.get('addSettings_name')
+                    setting_text = request.POST.get('addSettings_text')
 
-                    existing_add_settings.save()
+                    if not setting_name or not setting_text:
+                        return JsonResponse({'status': 'error', 'message': 'All fields must be filled for new setting'}, status=400)
+
+                    new_setting = AdditionalSettings(name=setting_name, text=setting_text)
+                    new_setting.save()
+                    computer.addSettings.add(new_setting)
                 else:
-                    # Если записи нет, создаем новую
-                    if field_name == 'addSettings_name':
-                        addSettings = AdditionalSettings(name=field_value)
-                    elif field_name == 'addSettings_text':
-                        addSettings = AdditionalSettings(text=field_value)
-
-                    addSettings.save()
-                    computer.addSettings.add(addSettings)
+                    try:
+                        setting = AdditionalSettings.objects.get(id=setting_id)
+                        if field_name.startswith('addSettings_name'):
+                            setting.name = field_value
+                        elif field_name.startswith('addSettings_text'):
+                            setting.text = field_value
+                        setting.save()
+                    except AdditionalSettings.DoesNotExist:
+                        return JsonResponse({'status': 'error', 'message': 'Setting not found'}, status=404)
 
             elif field_name == 'MonitorName':
                 existing_monitor = computer.monitor.first()
