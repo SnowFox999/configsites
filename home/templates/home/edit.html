@@ -70,56 +70,7 @@
   }
 </script>
 
-<script>
-  $(document).ready(function(){
-    $('#addUserBtn').click(function(){
-      var newUserRow = $('.user-row:first').clone();
-      
-      // Удаляем значения и идентификаторы
-      newUserRow.find('input').each(function(){
-        $(this).val('');
-        $(this).removeAttr('id');
-      });
 
-      // Удаляем старые скрытые поля
-      newUserRow.find('input[type="hidden"]').remove();
-      
-      // Добавляем скрытое поле для нового пользователя
-      $('<input>').attr({
-        type: 'hidden',
-        name: 'new_user',
-        value: 'true'
-      }).appendTo(newUserRow);
-
-      // Обновляем имена полей
-      var uniqueId = new Date().getTime();
-      newUserRow.find('input').each(function(){
-        var name = $(this).attr('name');
-        if (name) {
-          var newName = name.replace(/\d+$/, uniqueId);
-          $(this).attr('name', newName);
-        }
-      });
-
-      // Обновляем идентификаторы для datalist
-      newUserRow.find('datalist').each(function(index){
-        var newId = 'userList_' + uniqueId + '_' + index;
-        $(this).attr('id', newId);
-        $(this).find('option').each(function(){
-          $(this).removeAttr('value');
-        });
-      });
-
-      // Обновляем идентификаторы для input
-      newUserRow.find('input').each(function(){
-        var newId = 'input_' + uniqueId + '_' + Math.random().toString(36).substring(7);
-        $(this).attr('id', newId);
-      });
-
-      newUserRow.insertAfter('.user-row:last');
-    });
-  });
-</script>
 
 
 
@@ -224,7 +175,7 @@
 
 
 
-<script>
+{% comment %} <script>
   $(document).ready(function() {
       function getCookie(name) {
           let cookieValue = null;
@@ -272,7 +223,105 @@
       // Attach event handlers to input, textarea, and select elements
       $('input, textarea, select').on('change blur', handleChangeEvent);
   });
-</script> 
+</script> {% endcomment %}
+
+
+
+<script>
+  $(document).ready(function(){
+    $('#addUserBtn').click(function(){
+      var newUserRow = $('.user-row:first').clone();
+      
+      // Удаляем значения и идентификаторы
+      newUserRow.find('input').each(function(){
+        $(this).val('');
+        $(this).removeAttr('id');
+      });
+
+      // Удаляем старые скрытые поля
+      newUserRow.find('input[type="hidden"]').remove();
+      
+      var uniqueId = new Date().getTime();
+
+      // Добавляем скрытое поле для нового пользователя
+      $('<input>').attr({
+        type: 'hidden',
+        name: 'new_user_' + uniqueId,
+        value: 'true'
+      }).appendTo(newUserRow);
+
+      // Обновляем имена полей
+      newUserRow.find('input').each(function(){
+        var name = $(this).attr('name');
+        if (name) {
+          var newName = name.replace(/\d+$/, uniqueId);
+          $(this).attr('name', newName);
+        }
+      });
+
+      // Обновляем идентификаторы для datalist
+      newUserRow.find('datalist').each(function(index){
+        var newId = 'userList_' + uniqueId + '_' + index;
+        $(this).attr('id', newId);
+        $(this).find('option').each(function(){
+          $(this).removeAttr('value');
+        });
+      });
+
+      // Обновляем идентификаторы для input
+      newUserRow.find('input').each(function(){
+        var newId = 'input_' + uniqueId + '_' + Math.random().toString(36).substring(7);
+        $(this).attr('id', newId);
+      });
+
+      newUserRow.insertAfter('.user-row:last');
+    });
+
+    // Handle changes for all input fields
+    $(document).on('change blur', 'input', function() {
+      var fieldName = $(this).attr('name');
+      var fieldValue = $(this).val();
+      var computerId = {{ computer.id }};
+      var $userRow = $(this).closest('.user-row');
+      var isNewUser = $userRow.find('input[name^="new_user_"]').length > 0;
+      var userId = $userRow.attr('data-user-id');
+
+      var data = {
+        'field_name': fieldName,
+        'field_value': fieldValue,
+        'computer_id': computerId,
+      };
+
+      if (isNewUser) {
+        var newUserData = {
+          'user_type': $userRow.find('input[name^="user_type_"]').val(),
+          'user_name': $userRow.find('input[name^="user_name_"]').val(),
+          'password': $userRow.find('input[name^="password_"]').val(),
+          'new_user': 'true'
+        };
+        $.extend(data, newUserData);
+      }
+
+      $.ajax({
+        url: "{% url 'save_computer_data' %}",
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrftoken },
+        data: data
+      }).done(function(response) {
+        console.log('Field ' + fieldName + ' saved successfully');
+        if (response.status === 'success' && response.date) {
+          $('#date-field').val(response.date);
+          console.log('Date updated successfully');
+        }
+      }).fail(function(xhr, status, error) {
+        console.error('Error saving field ' + fieldName + ': ' + error);
+      });
+    });
+  });
+</script>
+
+
+
 
 
 
@@ -446,6 +495,8 @@
 
       {% endfor %}
       {% endif %}
+
+      <div id="new-users-container"></div>
 
       <div class="row">
           <button type="button" id="addUserBtn" class="btn btn-primary">Add user</button>

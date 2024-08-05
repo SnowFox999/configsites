@@ -526,6 +526,8 @@ def save_computer_data(request):
         field_value = request.POST.get('field_value')
         computer_id = request.POST.get('computer_id')
         
+
+        
         
 
         # Отладочный вывод
@@ -588,9 +590,12 @@ def save_computer_data(request):
                 is_new_user = request.POST.get('new_user') == 'true'
 
                 if is_new_user:
-                    user_type = request.POST.get('user_type_' + user_id)
-                    user_name = request.POST.get('user_name_' + user_id)
-                    user_password = request.POST.get('password_' + user_id)
+                    user_type = request.POST.get('user_type')
+                    user_name = request.POST.get('user_name')
+                    user_password = request.POST.get('password')
+
+                    # Отладочный вывод
+                    print("New user data:", user_type, user_name, user_password)
 
                     if not user_type or not user_name or not user_password:
                         return JsonResponse({'status': 'error', 'message': 'All fields must be filled for new user'}, status=400)
@@ -598,6 +603,7 @@ def save_computer_data(request):
                     new_user = UserName(user_type=user_type, login=user_name, password=user_password)
                     new_user.save()
                     computer.user.add(new_user)
+
                 else:
                     try:
                         user = UserName.objects.get(id=user_id)
@@ -610,6 +616,10 @@ def save_computer_data(request):
                         user.save()
                     except UserName.DoesNotExist:
                         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+
+
+
 
 
 
