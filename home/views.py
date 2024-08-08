@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.dateparse import parse_date
+import logging
 
 
 # Create your views here.
@@ -525,13 +526,6 @@ def save_computer_data(request):
         field_name = request.POST.get('field_name')
         field_value = request.POST.get('field_value')
         computer_id = request.POST.get('computer_id')
-        
-
-        
-        
-
-        # Отладочный вывод
-        print("Received data:", field_name, field_value, computer_id)
 
         if not field_name or not field_value or not computer_id:
             return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
@@ -588,17 +582,12 @@ def save_computer_data(request):
             elif field_name.startswith('user_type_') or field_name.startswith('user_name_') or field_name.startswith('password_'):
                 user_id = field_name.split('_')[-1]
                 is_new_user = request.POST.get('new_user') == 'true'
+                
 
                 if is_new_user:
                     user_type = request.POST.get('user_type')
                     user_name = request.POST.get('user_name')
                     user_password = request.POST.get('password')
-
-                    # Отладочный вывод
-                    print("New user data:", user_type, user_name, user_password)
-
-                    if not user_type or not user_name or not user_password:
-                        return JsonResponse({'status': 'error', 'message': 'All fields must be filled for new user'}, status=400)
 
                     new_user = UserName(user_type=user_type, login=user_name, password=user_password)
                     new_user.save()
@@ -616,12 +605,6 @@ def save_computer_data(request):
                         user.save()
                     except UserName.DoesNotExist:
                         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
-
-
-
-
-
-
 
 
             elif field_name == 'comment_text':
@@ -645,8 +628,6 @@ def save_computer_data(request):
                     
                     diskPlace.save()
                     computer.diskPlace.add(location)
-
-                
 
 
             elif field_name.startswith('addSettings_name') or field_name.startswith('addSettings_text'):
@@ -686,14 +667,12 @@ def save_computer_data(request):
                     monitor.save()
                     computer.monitor.add(monitor)
 
-               
-
 
             elif field_name == 'windows_name' or field_name == 'windows_licenseNumber' or field_name == 'windows_licenseKeys':
                 
                 existing_windows = computer.windowses.first()
                 if existing_windows:
-                    # Если запись существует, обновляем её
+                   
                     if field_name == 'windows_name':
                         existing_windows.name = field_value
                     elif field_name == 'windows_licenseNumber':
@@ -703,7 +682,7 @@ def save_computer_data(request):
 
                     existing_windows.save()
                 else:
-                    # Если записи нет, создаем новую
+                    
                     if field_name == 'windows_name':
                         windows = Windows(name=field_value)
                     elif field_name == 'windows_licenseNumber':
@@ -713,8 +692,6 @@ def save_computer_data(request):
 
                     windows.save()
                     computer.windowses.add(windows)
-
-
 
 
             elif field_name == 'Processor':
@@ -736,7 +713,7 @@ def save_computer_data(request):
                 existing_ram = computer.ram.first()
 
                 if existing_ram:
-                    # Если запись существует, обновляем её
+                    
                     if field_name == 'ram_type':
                         existing_ram.type = field_value
                     elif field_name == 'ram_gigabytes':
@@ -744,7 +721,7 @@ def save_computer_data(request):
 
                     existing_ram.save()
                 else:
-                    # Если записи нет, создаем новую
+                   
                     if field_name == 'ram_type':
                         ram = RAM(type=field_value)
                     elif field_name == 'ram_gigabytes':
@@ -754,13 +731,12 @@ def save_computer_data(request):
                     computer.ram.add(ram)
 
 
-
             elif field_name == 'disk_type' or field_name =='disk_gigabytes':
 
                 existing_disk = computer.hardDisk.first()
 
                 if existing_disk:
-                    # Если запись существует, обновляем её
+                   
                     if field_name == 'disk_type':
                         existing_disk.type = field_value
                     elif field_name == 'disk_gigabytes':
@@ -768,7 +744,7 @@ def save_computer_data(request):
 
                     existing_disk.save()
                 else:
-                    # Если записи нет, создаем новую
+                    
                     if field_name == 'disk_type':
                         hardDisk = HardDisk(type=field_value)
                     elif field_name == 'disk_gigabytes':
@@ -793,9 +769,9 @@ def save_computer_data(request):
             elif field_name =='typeDB_Version' or field_name == 'typeDB_Type':
 
                 existing_typeDB = computer.typeDB.first()
-                print(field_name)
+                
                 if existing_typeDB:
-                    # Если запись существует, обновляем её
+                    
                     if field_name == 'typeDB_Type':
                         existing_typeDB.type = field_value
                         print(existing_typeDB)
@@ -804,7 +780,7 @@ def save_computer_data(request):
 
                     existing_typeDB.save()
                 else:
-                    # Если записи нет, создаем новую
+                    
                     if field_name == 'typeDB_Type':
                         typeDB = TypeDB(type=field_value)
                     elif field_name == 'typeDB_Version':
@@ -813,13 +789,12 @@ def save_computer_data(request):
                     typeDB.save()
                     computer.typeDB.add(typeDB)
 
-
-                
+               
             elif field_name == 'lanCard_type' or field_name =='lanCard_series':
                 existing_lanCard = computer.lanCard.first()
 
                 if existing_lanCard:
-                    # Если запись существует, обновляем её
+                    
                     if field_name == 'lanCard_type':
                         existing_lanCard.type = field_value
                     elif field_name == 'lanCard_series':
@@ -827,7 +802,7 @@ def save_computer_data(request):
 
                     existing_lanCard.save()
                 else:
-                    # Если записи нет, создаем новую
+                    
                     if field_name == 'lanCard_type':
                         lanCard = LANcard(type=field_value)
                     elif field_name == 'lanCard_series':
@@ -836,13 +811,6 @@ def save_computer_data(request):
                     lanCard.save()
                     computer.lanCard.add(lanCard)
 
-                
-         
-            
-
-
-
-
             else:
                 if hasattr(computer, field_name):
                     setattr(computer, field_name, field_value)
@@ -850,15 +818,12 @@ def save_computer_data(request):
                     return JsonResponse({'status': 'error', 'message': 'Invalid field name'}, status=400)
 
             computer.save()
-
-            
-            
+                  
             current_date = timezone.now().date()
             if computer.date != current_date:
                 computer.date = current_date
                 computer.save()
                 return JsonResponse({'status': 'success', 'date': current_date.strftime('%b %d, %Y')})
-
 
             return JsonResponse({'status': 'success'})
         except ValidationError as e:

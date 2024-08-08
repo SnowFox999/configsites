@@ -148,3 +148,26 @@ class ComputerForm(forms.ModelForm):
             self.add_error('ram_type', 'The RAM type is too long.')
 
         return cleaned_data
+
+
+
+
+
+class ComputerStep1Form(forms.ModelForm):
+    class Meta:
+        model = Computer
+        fields = ['type', 'serial_number']
+
+class CustomerEmployeeForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = ['name']
+
+class LocationDiskPlaceForm(forms.ModelForm):
+    class Meta:
+        model = Location
+        fields = ['name']
+
+    class Meta:
+        model = DiskPlace
+        fields = ['name']

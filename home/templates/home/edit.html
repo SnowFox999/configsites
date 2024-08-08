@@ -146,41 +146,42 @@
 
 <script>
   $(document).ready(function() {
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
+      function getCookie(name) {
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+              const cookies = document.cookie.split(';');
+              for (let i = 0; i < cookies.length; i++) {
+                  const cookie = cookies[i].trim();
+                  if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
 
-    const csrftoken = getCookie('csrftoken');
-    let requestInProgress = false;
+      const csrftoken = getCookie('csrftoken');
+      let requestInProgress = false;
 
-    function handleFieldChange(event) {
+      function handleFieldChange(event) {
         if (requestInProgress) return;
-
+    
         requestInProgress = true;
-
+    
         var fieldName = $(this).attr('name');
         var fieldValue = $(this).val();
-        var computerId = {{ computer.id }};
+        var computerId = "{{ computer.id }}";
         var $row = $(this).closest('.user-row, .add-settings');
         var isNewUser = $row.find('input[name^="new_user_"]').length > 0;
         var isNewSetting = $row.find('input[name^="new_setting_"]').length > 0;
+        
         var data = {
             'field_name': fieldName,
             'field_value': fieldValue,
             'computer_id': computerId,
         };
-
+    
         if (isNewUser) {
             var newUserData = {
                 'user_type': $row.find('input[name^="user_type_"]').val(),
@@ -197,133 +198,158 @@
             };
             $.extend(data, newSettingData);
         }
-
+    
+        console.log('Sending data to server:', data);
+    
         $.ajax({
             url: "{% url 'save_computer_data' %}",
             method: 'POST',
             headers: { 'X-CSRFToken': csrftoken },
             data: data
         }).done(function(response) {
-            console.log('Field ' + fieldName + ' saved successfully');
-            if (response.status === 'success' && response.date) {
-                $('#date-field').val(response.date);
-                console.log('Date updated successfully');
-            }
+          console.log('Field ' + fieldName + ' saved successfully');
+          if (response.status === 'success' && response.date) {
+              $('#date-field').val(response.date);
+              console.log('Date updated successfully');
+          } else {
+              console.error('Server responded with an error:', response.message);
+          }
         }).fail(function(xhr, status, error) {
             console.error('Error saving field ' + fieldName + ': ' + error);
+            console.log('Response text:', xhr.responseText);
         }).always(function() {
             requestInProgress = false;
         });
+    
+        // Add 'track-changes' class to the form-group
+        $(this).closest('.form-group').addClass('track-changes');
     }
+    
 
-    $(document).on('change blur', 'input, textarea, select', handleFieldChange);
+      $(document).on('change blur', 'input, textarea, select', handleFieldChange);
+      $(document).on('change blur', '.user-row input, .add-settings input', handleFieldChange);
 
-    $('#addUserBtn').click(function() {
-        var newUserRow = $('.user-row:first').clone();
-        newUserRow.find('input').each(function() {
-            $(this).val('');
-            $(this).removeAttr('id');
-        });
-        newUserRow.find('input[type="hidden"]').remove();
+      $('#addUserBtn').click(function() {
         var uniqueId = new Date().getTime();
-        $('<input>').attr({
-            type: 'hidden',
-            name: 'new_user_' + uniqueId,
-            value: 'true'
-        }).appendTo(newUserRow);
-        newUserRow.find('input').each(function() {
-            var name = $(this).attr('name');
-            if (name) {
-                var newName = name.replace(/\d+$/, uniqueId);
-                $(this).attr('name', newName);
-            }
-        });
-        newUserRow.find('datalist').each(function(index) {
-            var newId = 'userList_' + uniqueId + '_' + index;
-            $(this).attr('id', newId);
-            $(this).find('option').each(function() {
-                $(this).removeAttr('value');
-            });
-        });
-        newUserRow.find('input').each(function() {
-            var newId = 'input_' + uniqueId + '_' + Math.random().toString(36).substring(7);
-            $(this).attr('id', newId);
-        });
-        newUserRow.insertAfter('.user-row:last');
+        var newUserRow = `
+            <div class="row user-row" data-user-id="${uniqueId}">
+                <div class="col-sm-2">
+                    <div class="form-group track-changes">
+                        <label>User type</label>
+                        <input list="userList_${uniqueId}" name="user_type_${uniqueId}" class="form-control" placeholder="User type" style="width: 100%">
+                        <datalist id="userList_${uniqueId}">
+                            {% for choice in user_types %}
+                            <option value="{{ choice }}"></option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group track-changes">
+                        <label>User name</label>
+                        <input type="text" class="form-control" name="user_name_${uniqueId}" placeholder="User name">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="row">
+                        <div class="col-sm-10">
+                            <div class="form-group track-changes">
+                                <label>User password</label>
+                                <input type="text" class="form-control" name="password_${uniqueId}" placeholder="User password">
+                            </div>
+                        </div>
+                        <div class="col-sm-2 text-right" style="display: flex; align-items: center;">
+                            <button type="button" class="btn btn-link delete-user-btn text-danger p-0" data-user-id="${uniqueId}" style="height: 100%;">Delete</button>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="new_user_${uniqueId}" value="true" />
+            </div>
+        `;
+        $('#new-users-container').append(newUserRow);
     });
+    
 
-    $('#addSettingsBtn').click(function() {
-        var newSettingsRow = $('.add-settings:first').clone();
-        newSettingsRow.find('input').each(function() {
-            $(this).val('');
-            $(this).removeAttr('id');
-        });
-        var uniqueId = new Date().getTime();
-        $('<input>').attr({
-            type: 'hidden',
-            name: 'new_setting_' + uniqueId,
-            value: 'true'
-        }).appendTo(newSettingsRow);
-        newSettingsRow.find('input').each(function() {
-            var name = $(this).attr('name');
-            if (name) {
-                var newName = name.replace(/\d+$/, uniqueId);
-                $(this).attr('name', newName);
-            }
-        });
-        newSettingsRow.find('datalist').each(function(index) {
-            var newId = 'addSettingList_' + uniqueId + '_' + index;
-            $(this).attr('id', newId);
-            $(this).find('option').each(function() {
-                $(this).removeAttr('value');
-            });
-        });
-        newSettingsRow.find('input').each(function() {
-            var newId = 'input_' + uniqueId + '_' + Math.random().toString(36).substring(7);
-            $(this).attr('id', newId);
-        });
-        newSettingsRow.insertAfter('.add-settings:last');
-    });
+      $('#addSettingsBtn').click(function() {
+          var uniqueId = new Date().getTime();
+          var newSettingsRow = `
+              <div class="row add-settings" data-setting-id="${uniqueId}">
+                  <div class="col-sm-4">
+                      <div class="form-group track-changes">
+                          <label>Additional settings</label>
+                          <input list="addSettingList_${uniqueId}" name="addSettings_name_${uniqueId}" class="form-control" placeholder="Additional settings" style="width: 100%">
+                          <datalist id="addSettingList_${uniqueId}">
+                              {% for addSetting in addSettings_queryset %}
+                              <option value="{{ addSetting.name }}"></option>
+                              {% endfor %}
+                          </datalist>
+                      </div>
+                  </div>
+                  <div class="col-sm-4">
+                      <div class="form-group track-changes">
+                          <label>Additional settings</label>
+                          <input type="text" class="form-control mb-3" name="addSettings_text_${uniqueId}" placeholder="Additional settings">
+                      </div>
+                  </div>
+                  <div class="col-sm-2 text-left">
+                      <button type="button" class="btn btn-link delete-setting-btn text-danger p-0" data-setting-id="${uniqueId}" style="height: 100%;">Delete</button>
+                  </div>
+                   <input type="hidden" name="new_setting_${uniqueId}" value="true" />
+              </div>
+          `;
+          $('#new-settings-container').append(newSettingsRow);
+      });
 
-    // Обработчики событий для кнопок удаления
-    $(document).on('click', '.delete-user-btn', function() {
-        var userId = $(this).data('user-id');
-        var $row = $(this).closest('.user-row');
-        $.ajax({
-            url: "{% url 'delete_user' %}",
-            method: 'POST',
-            headers: { 'X-CSRFToken': csrftoken },
-            data: { 'user_id': userId }
-        }).done(function(response) {
-            if (response.status === 'success') {
-                $row.remove();
-            }
-        }).fail(function(xhr, status, error) {
-            console.error('Error deleting user: ' + error);
-        });
-    });
+      $(document).on('click', '.delete-user-btn', function() {
+          var userId = $(this).data('user-id');
+          var $row = $(this).closest('.user-row');
+          console.log('Deleting user with ID:', userId);  // Debug log
+          $.ajax({
+              url: "{% url 'delete_user' %}",
+              method: 'POST',
+              headers: { 'X-CSRFToken': csrftoken },
+              data: { 'user_id': userId }
+          }).done(function(response) {
+              if (response.status === 'success') {
+                  console.log('User deleted successfully');  // Debug log
+                  $row.remove();
+              } else {
+                  console.error('Error deleting user:', response.message);
+              }
+          }).fail(function(xhr, status, error) {
+              console.error('Error deleting user: ' + error);
+              console.log('Response text:', xhr.responseText);
+          });
+      });
 
-    $(document).on('click', '.delete-setting-btn', function() {
-        var settingId = $(this).data('setting-id');
-        var $row = $(this).closest('.add-settings');
-        $.ajax({
-            url: "{% url 'delete_setting' %}",
-            method: 'POST',
-            headers: { 'X-CSRFToken': csrftoken },
-            data: { 'setting_id': settingId }
-        }).done(function(response) {
-            if (response.status === 'success') {
-                $row.remove();
-            }
-        }).fail(function(xhr, status, error) {
-            console.error('Error deleting setting: ' + error);
-        });
-    });
-});
-
-
-
+      $(document).on('click', '.delete-setting-btn', function() {
+          var settingId = $(this).data('setting-id');
+          var $row = $(this).closest('.add-settings');
+          console.log('Deleting setting with ID:', settingId);  // Debug log
+          $.ajax({
+              url: "{% url 'delete_setting' %}",
+              method: 'POST',
+              headers: { 'X-CSRFToken': csrftoken },
+              data: { 'setting_id': settingId }
+          }).done(function(response) {
+              if (response.status === 'success') {
+                  console.log('Setting deleted successfully');  // Debug log
+                  $row.remove();
+              } else {
+                  console.error('Error deleting setting:', response.message);
+              }
+          }).fail(function(xhr, status, error) {
+              console.error('Error deleting setting: ' + error);
+              console.log('Response text:', xhr.responseText);
+          });
+      });
+  });
 </script>
+
+
+
+  
+
 
 
 
@@ -382,10 +408,8 @@
                     <input type="radio" name="options" autocomplete="off"> Confirm
                 </label>
             </div>
-            <div style="margin-right: 10px;"></div>
-            <div class="ml-auto">
-              <button id="save-btn" type="button" class="btn btn-primary">Save</button>
-            </div>
+           
+            
         </div>
       </div>
   
@@ -821,15 +845,15 @@
   
     {% if addSettings_queryset %}    
     {% for addSettings in addSettings_queryset%}         
-              <div class="row add-settings" data-setting-id="{{ addSettings.id}}">               
+              <div class="row add-settings" data-setting-id="{{ addSettings.id }}">               
                 <div class="col-sm-4">
                   
                     <div class="form-group track-changes">
                       <label>Additional settings</label>
-                      <input list="addSettingList" id="addSettingsInput" name="addSettings_name_{{ addSetting.id }}" class="form-control" 
+                      <input list="addSettingList_{{ addSetting.id }}" id="addSettingsInput_{{ addSetting.id }}" name="addSettings_name_{{ addSetting.id }}" class="form-control" 
                           value="{{ addSettings.name }}" placeholder="Additional settings" 
                           style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
-                      <datalist id="addSettingList">
+                      <datalist id="addSettingList_{{ addSetting.id }}">
                         {% for addSettings in addSettings_queryset %}
                           <option value="{{ addSettings.name }}">{{ addSettings.name }}</option>
                         {% endfor %}       
@@ -913,9 +937,7 @@
                     
                   </div>
                 </div>
-                <footer class="main-footer">
-                
-                </footer>                             
+                                          
               </div>  
                        
             </form>
@@ -953,7 +975,7 @@
                   $(":input").inputmask();
               });
 
-                // Инициализация Inputmask
+               
                 $(":input").inputmask();
               });
               
@@ -968,7 +990,7 @@
                       let formData = $('#editComputerForm').serialize();
                       
                       $.ajax({
-                          url: '{% url "edit" computer.id %}',  // URL представления для обработки формы
+                          url: '{% url "edit" computer.id %}',  
                           type: 'POST',
                           data: formData,
                           success: function(response) {
@@ -991,11 +1013,9 @@
         </div>
         <!-- /.card -->
         <!-- /.card-body -->
-        <div class="card-footer">
-          Footer
-        </div>
+        
         <!-- /.card-footer-->
-      </div>
+      
       <!-- /.card -->
 
     </section>
