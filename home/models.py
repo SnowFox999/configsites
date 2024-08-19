@@ -37,10 +37,6 @@ class Computer(models.Model):
     type = models.CharField(max_length=30, choices=TYPE_CHOICES, blank=True, null=True)
     custom_type = models.CharField(max_length=30, blank=True, null=True)
 
-    
-
-   
-
     processor = models.ManyToManyField('Processor', blank=True) #many processors to many computers
     ram = models.ManyToManyField('RAM', blank=True) # many to many RAM
     hardDisk = models.ManyToManyField('HardDisk', blank=True) # many to many HardDisk

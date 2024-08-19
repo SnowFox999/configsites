@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "crispy_forms",
     'formtools',
+    'clear_cache',
 
 
     "home",
@@ -89,7 +90,7 @@ ROOT_URLCONF = "core.urls"
 
 HOME_TEMPLATES = os.path.join(BASE_DIR, 'templates')
 
-
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 TEMPLATES = [
     {

@@ -1,19 +1,20 @@
 
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from rest_framework.response import Response
 from django.contrib.auth.decorators import login_required
 from .models import Computer, Order_Computer, Customer, Location, UserName, Employee, Processor, VideoCard, LANcard, RAM, HardDisk, Windows, TypeDB, Monitor, DiskPlace, AdditionalSettings
 from django.db.models import Q
 import json
-from .forms import ComputerForm
+from .forms import ComputerForm, FirstForm, MainInformationForm
+
 from datetime import datetime
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.dateparse import parse_date
 import logging
-
+from formtools.wizard.views import SessionWizardView 
 
 # Create your views here.
 
@@ -375,118 +376,6 @@ def edit(request, computer_id):
             return JsonResponse({'error': form.errors}, status=400)
     else:
         form = ComputerForm(instance=computer, customer_queryset=customer_queryset, employee_queryset=employee_queryset)
-
-
-    
-    # if request.method == 'POST':
-    #     form = ComputerForm(request.POST, request.FILES, instance=computer, customer_queryset=customer_queryset, employee_queryset=employee_queryset)
-    #     if form.is_valid():
-    #         computer = form.save(commit=False)
-    #         computer.date =  timezone.now()
-    #         status = request.POST.get('status')
-    #         if status in ['Progress', 'Ready', 'Confirm']:
-    #             computer.status = status
-
-            
-
-    #         # Обработка поля location_name
-    #         location_name = form.cleaned_data.get('location_name')
-    #         if location_name:
-    #             location, created = Location.objects.get_or_create(name=location_name, computer=computer)
-    #             computer.locations.clear()
-    #             computer.locations.add(location)
-
-            
-    #         processor_name = request.POST.get('processor_name')
-    #         if processor_name:
-    #             processor, created = Processor.objects.get_or_create(name=processor_name, computer=computer)
-    #             computer.processor.clear()
-    #             computer.processor.add(processor)
-
-    #         videoCard_name = form.cleaned_data.get('videoCard_name')
-    #         if videoCard_name:
-    #             videoCard, created = VideoCard.objects.get_or_create(name=videoCard_name, computer=computer)
-    #             computer.videoCard.clear()
-    #             computer.videoCard.add(videoCard)
-
-    #         lanCard_type = form.cleaned_data.get('lanCard_type')
-    #         lanCard_series = form.cleaned_data.get('lanCard_series')
-    #         if lanCard_type and lanCard_series:
-    #             lanCard, created = LANcard.objects.get_or_create(type=lanCard_type, series=lanCard_series, computer=computer)
-    #             computer.lanCard.clear()
-    #             computer.lanCard.add(lanCard)
-
-    #         ram_type = form.cleaned_data.get('ram_type')
-    #         ram_gigabytes = form.cleaned_data.get('ram_gigabytes')
-    #         if ram_type and ram_gigabytes:
-    #             ram, created = RAM.objects.get_or_create(type=ram_type, gigabytes=ram_gigabytes, computer=computer)
-    #             computer.ram.clear()
-    #             computer.ram.add(ram)
-
-    #         hardDisk_type = request.POST.get('hardDisk_type')
-    #         hardDisk_gigabytes = request.POST.get('hardDisk_gigabytes')
-    #         if hardDisk_type and hardDisk_gigabytes:
-    #             hardDisk, created = HardDisk.objects.get_or_create(type=hardDisk_type, gigabytes=hardDisk_gigabytes)
-    #             computer.hardDisk.clear()
-    #             computer.hardDisk.add(hardDisk)
-
-    #         windows_name = request.POST.get('windows_name')
-    #         windows_licenseNumber = request.POST.get('windows_licenseNumber')
-    #         windows_licenseKeys = request.POST.get('windows_licenseKeys')
-    #         if windows_name and windows_licenseNumber and windows_licenseKeys:
-    #             windowses, created = Windows.objects.get_or_create(name=windows_name, licenseNumber=windows_licenseNumber, licenseKeys=windows_licenseKeys)
-    #             computer.windowses.clear()
-    #             computer.windowses.add(windowses)
-
-    #         typeDB_type = request.POST.get('typeDB_type')
-    #         typeDB_version = request.POST.get('typeDB_version')
-    #         if typeDB_type and typeDB_version:
-    #             typeDB, created = TypeDB.objects.get_or_create(type=typeDB_type, version=typeDB_version)
-    #             computer.typeDB.clear()
-    #             computer.typeDB.add(typeDB)
-
-    #         computer.addComment = form.cleaned_data.get('addComment_value')
-    #         computer.addDevices = form.cleaned_data.get('addDevices_value')
-    #         computer.addSoftware = form.cleaned_data.get('addSoftware_value')
-
-    #         monitor_name = form.cleaned_data.get('monitor_name')
-    #         if monitor_name:
-    #             monitor, created = Monitor.objects.get_or_create(name=monitor_name)
-    #             computer.monitor.clear()
-    #             computer.monitor.add(monitor)
-
-    #         diskPlace_name = form.cleaned_data.get('diskPlace_name')
-    #         if diskPlace_name:
-    #             diskPlace, created = DiskPlace.objects.get_or_create(name=diskPlace_name)
-    #             computer.monitor.clear()
-    #             computer.monitor.add(diskPlace)
-
-    #         addSettings_name = request.POST.get('addSettings_name')
-    #         addSettings_text = request.POST.get('addSettings_text')
-    #         if addSettings_name and addSettings_text:
-    #             addSettings, created = AdditionalSettings.objects.get_or_create(name=addSettings_name, text=addSettings_text)
-    #             computer.addSettings.clear()
-    #             computer.addSettings.add(addSettings)
-
-    #         for user in UserName.objects.filter(computer=computer):
-    #             user_type = request.POST.get(f'user_type_{user.pk}')
-    #             user_name = request.POST.get(f'user_name_{user.pk}')
-    #             user_password = request.POST.get(f'password_{user.pk}')
-    #             if user_type:
-    #                 user.user_type = user_type
-    #             if user_name:
-    #                 user.login = user_name
-    #             if user_password:
-    #                 user.password = user_password
-    #             user.save()
-
-    #         computer.save()
-    #         form.save_m2m()  # Сохранение ManyToMany полей
-    #         return JsonResponse({'message': 'Success'})
-    #     else:
-    #         return JsonResponse({'error': form.errors}, status=400)
-    # else:
-    #     form = ComputerForm(instance=computer, customer_queryset=customer_queryset)
         
 
     context = {
@@ -926,7 +815,52 @@ def search_orders(request):
 
 
 
+class ComputerWizard(SessionWizardView):
+   
 
+    
+    form_list = [FirstForm, MainInformationForm]
+    template_name = 'home/computer_wizard_form.html'
+    
+    def get_form_kwargs(self, step=None):
+        kwargs = super().get_form_kwargs(step)
+        if step == '0':  # assuming FirstForm is the first form
+            kwargs['customer_queryset'] = Customer.objects.all()
+        return kwargs
+    
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form=form, **kwargs)
+        if self.steps.current == '0':  # assuming FirstForm is the first form
+            context['customer_queryset'] = Customer.objects.all()
+        elif self.steps.current == '1':  # assuming MainInformationForm is the second form
+            context['users'] = UserName.objects.all()  # или другой источник данных для пользователей
+        return context
+    
+    def done(self, form_list, **kwargs):
+        
+        # Обработка данных после завершения визарда
+        data = self.get_all_cleaned_data()
+        computer = Computer.objects.create(
+            type=data.get('type', ''),
+            
+        )
+        customer = Customer.objects.create(name=data.get('name', ''))
+        location = Location.objects.create(name=data.get('location_name', ''))
 
+        for user_data in zip(data.getlist('user_name'), data.getlist('user_password')):
+            user = UserName.objects.create(
+                user_type=data.get('user_type'),
+                user_name=user_data[0],
+                user_password=user_data[1]
+            )
+            computer.user.add(user)
+
+        # Установите связи между объектами, если необходимо
+        computer.customer = customer
+        computer.locations.add(location)
+      
+        computer.save()
+
+        return HttpResponseRedirect('/success/')
 
 

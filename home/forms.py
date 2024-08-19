@@ -1,6 +1,9 @@
 from django import forms
 from .models import Customer, Employee, Computer, Processor, RAM, HardDisk, DiskPlace, VideoCard, TypeDB, LANcard, Location, Monitor, UserName, AdditionalSettings, Windows, Order_Computer
 
+
+
+
 class ComputerForm(forms.ModelForm):
     customer_name = forms.ChoiceField(required=False)
     location_name = forms.ChoiceField(required=False)
@@ -153,21 +156,82 @@ class ComputerForm(forms.ModelForm):
 
 
 
-class ComputerStep1Form(forms.ModelForm):
-    class Meta:
-        model = Computer
-        fields = ['type', 'serial_number']
+class FirstForm(forms.Form):
+    customer_name = forms.CharField()
 
-class CustomerEmployeeForm(forms.ModelForm):
-    class Meta:
-        model = Customer
-        fields = ['name']
+    # Поля из Location модели
+    location_name = forms.CharField()
 
-class LocationDiskPlaceForm(forms.ModelForm):
-    class Meta:
-        model = Location
-        fields = ['name']
+    # Поля из Computer модели
+    computer_type = forms.ChoiceField(choices=Computer.TYPE_CHOICES, required=False)
 
-    class Meta:
-        model = DiskPlace
-        fields = ['name']
+    custom_computer_type = forms.CharField(
+        label="Custom Computer Type",
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        # Получаем queryset, если он передан
+        self.customer_queryset = kwargs.pop('customer_queryset', None)
+        super().__init__(*args, **kwargs)
+        
+        # Используем queryset для создания выбора в поле
+        if self.customer_queryset:
+            self.fields['customer_name'].widget = forms.TextInput(
+                attrs={
+                    'list': 'customerList',
+                    'placeholder': 'Customer name',
+                    'class': 'form-control',
+                    'style': 'width: 100%'
+                }
+            )
+   
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        computer_type = cleaned_data.get('computer_type')
+        custom_computer_type = cleaned_data.get('custom_computer_type')
+
+        # Проверяем, чтобы был выбран либо существующий тип, либо введен кастомный тип
+        if not computer_type and not custom_computer_type:
+            raise forms.ValidationError("Choose type")
+
+        return cleaned_data
+    
+    def clean_customer_name(self):
+        customer_name = self.cleaned_data.get('customer_name')
+        if not customer_name:
+            raise forms.ValidationError("Customer name cannot be empty.")
+        return customer_name
+
+    def save(self):
+        cleaned_data = self.cleaned_data
+        # Создание объектов и сохранение данных
+        customer_name = cleaned_data['customer_name']
+        location = Location.objects.create(name=self.cleaned_data['location_name'])
+        computer_type = self.cleaned_data['custom_computer_type'] or self.cleaned_data['computer_type']
+        computer = Computer.objects.create(
+            type=self.cleaned_data['computer_type'] if not self.cleaned_data['custom_computer_type'] else None,  # Используем существующий тип
+            custom_type=computer_type  # Используем кастомный тип
+        )
+
+        customer, created = Customer.objects.get_or_create(name=customer_name)
+
+        # Установка связей между моделями
+        computer.customer = customer
+        computer.locations.add(location)
+        computer.save()
+
+
+
+class MainInformationForm(forms.Form):
+
+    computer_name = forms.CharField()
+    computer_series = forms.CharField()
+    computer_comment = forms.CharField()
+
+    user_type = forms.ChoiceField(choices=UserName.USER_TYPES, required=False)
+    user_name = forms.CharField()
+    user_password = forms.CharField()
+
+    

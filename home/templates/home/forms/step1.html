@@ -1,0 +1,42 @@
+<!-- templates/forms/first_form.html -->
+<div class="form-group">
+    <div class="form-group track-changes">
+        <label>Customer name</label>
+        <input list="customerList" id="customerInput" name="customer_name" class="form-control"  placeholder="Select or enter customer name" style="width: 100%">
+        <datalist id="customerList">
+            {% for customer in customer_queryset %}
+            <option value="{{ customer.name }}">
+            {% endfor %}
+        </datalist>
+        {{ form.customer_name.errors }}
+</div>
+
+<div class="form-group">
+    <label for="{{ wizard.form.location_name.id_for_label }}" class="form-label">
+        {{ wizard.form.location_name.label_tag }}
+    </label>
+    <input
+        type="text"
+        class="form-control"
+        placeholder="Enter placement"
+        name="{{ wizard.form.location_name.name }}"
+        
+        id="{{ wizard.form.location_name.id_for_label }}"
+    >
+</div>
+
+
+<div class="form-group">
+    <label for="computerTypeInput">Computer Type</label>
+    <input list="computerTypeList" id="computerTypeInput" name="computer_type" class="form-control"
+           placeholder="Select or enter computer type"
+           >
+    <datalist id="computerTypeList">
+        {% for choice in wizard.form.fields.computer_type.choices %}
+            <option value="{{ choice }}">{{ choice }}</option>
+        {% endfor %}
+    </datalist>
+</div>
+
+
+

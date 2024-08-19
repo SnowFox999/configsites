@@ -1,0 +1,79 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %} Blank Page {% endblock title %}
+{% block bodyclass %} hold-transition sidebar-mini {% endblock bodyclass %}
+{% block content %}
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Wizard Form</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Wizard Form</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+      <!-- Default box -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Select Computer Type or Add Custom Type</h3>
+
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Step {{ wizard.steps.step }} of {{ wizard.steps.count }}</p>
+          <form action="" method="post">
+            {% csrf_token %}
+            {{ wizard.management_form }}
+            {% if wizard.form %}
+                {% if wizard.steps.current == '0' %}
+                    {% include 'home/forms/step1.html' %}
+                {% elif wizard.steps.current == '1' %}
+                    {% include 'home/forms/step2.html' %}
+                {% endif %}
+            {% endif %}
+              
+              <div class="form-navigation">
+                  {% if wizard.steps.prev %}
+                      <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-primary">{% trans "Previous" %}</button>
+                  {% endif %}
+                  {% if wizard.steps.next %}
+                      <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.next }}" class="btn btn-primary">{% trans "Next" %}</button>
+                  {% endif %}
+                  {% if wizard.steps.last %}
+                      <button type="submit" class="btn btn-success">{% trans "Submit" %}</button>
+                  {% endif %}
+              </div>
+          </form>
+        </div>
+        <!-- /.card-body -->
+        
+        <!-- /.card-footer-->
+      </div>
+      <!-- /.card -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+{% endblock content %}
