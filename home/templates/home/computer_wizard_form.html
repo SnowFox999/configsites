@@ -12,12 +12,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Wizard Form</h1>
+            <h1>New computer</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Wizard Form</li>
+              <li class="breadcrumb-item active">Creating computer</li>
             </ol>
           </div>
         </div>
@@ -30,7 +30,7 @@
       <!-- Default box -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Select Computer Type or Add Custom Type</h3>
+          <h3 class="card-title">Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</h3>
 
           <div class="card-tools">
             <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
@@ -42,7 +42,7 @@
           </div>
         </div>
         <div class="card-body">
-          <p>Step {{ wizard.steps.step }} of {{ wizard.steps.count }}</p>
+          
           <form action="" method="post">
             {% csrf_token %}
             {{ wizard.management_form }}
@@ -51,17 +51,21 @@
                     {% include 'home/forms/step1.html' %}
                 {% elif wizard.steps.current == '1' %}
                     {% include 'home/forms/step2.html' %}
+                {% elif wizard.steps.current == '2' %}
+                    {% include 'home/forms/step3.html' %}
                 {% endif %}
             {% endif %}
               
+            <div class="mt-3 col-md-12">
+
               <div class="form-navigation">
                   {% if wizard.steps.prev %}
-                      <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-primary">{% trans "Previous" %}</button>
+                      <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-outline-secondary">{% trans "Back" %}</button>
                   {% endif %}
                   {% if wizard.steps.next %}
-                      <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.next }}" class="btn btn-primary">{% trans "Next" %}</button>
+                      <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.next }}" class="btn btn-outline-primary">{% trans "Next" %}</button>
                   {% endif %}
-                  {% if wizard.steps.last %}
+                  {% if wizard.steps.current == wizard.steps.last %}
                       <button type="submit" class="btn btn-success">{% trans "Submit" %}</button>
                   {% endif %}
               </div>

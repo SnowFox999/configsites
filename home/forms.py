@@ -209,9 +209,9 @@ class FirstForm(forms.Form):
         # Создание объектов и сохранение данных
         customer_name = cleaned_data['customer_name']
         location = Location.objects.create(name=self.cleaned_data['location_name'])
-        computer_type = self.cleaned_data['custom_computer_type'] or self.cleaned_data['computer_type']
+        computer_type = cleaned_data['custom_computer_type'] or self.cleaned_data['computer_type']
         computer = Computer.objects.create(
-            type=self.cleaned_data['computer_type'] if not self.cleaned_data['custom_computer_type'] else None,  # Используем существующий тип
+            type=cleaned_data['computer_type'] if not self.cleaned_data['custom_computer_type'] else None,  # Используем существующий тип
             custom_type=computer_type  # Используем кастомный тип
         )
 
@@ -233,5 +233,75 @@ class MainInformationForm(forms.Form):
     user_type = forms.ChoiceField(choices=UserName.USER_TYPES, required=False)
     user_name = forms.CharField()
     user_password = forms.CharField()
-
     
+
+    def clean(self):
+        cleaned_data = super().clean()
+        user_name = cleaned_data.get('user_name')
+        user_password = cleaned_data.get('user_password')
+        user_type = cleaned_data.get('user_type')
+
+        computer_name = cleaned_data.get('computer_name')
+        computer_series = cleaned_data.get('computer_series')
+        computer_comment = cleaned_data.get('computer_comment')
+
+        if not computer_name:
+            raise forms.ValidationError('Computer name must be filled')
+        
+        if not computer_series:
+            raise forms.ValidationError('Computer series must be filled')
+
+
+        # Проверка, что имя пользователя и пароль заполнены
+        if not user_name or not user_password or not user_type:
+            raise forms.ValidationError("User name and password must be provided.")
+  
+        return cleaned_data
+    
+
+
+class ComputerHardwareForm(forms.Form):
+
+    processor_name = forms.CharField()
+    videoCard_name = forms.CharField()
+
+    ram_gigabytes = forms.ChoiceField(choices=RAM.GIGABYTES_TYPES, required=False)
+    ram_types = forms.ChoiceField(choices=RAM.RAM_TYPES, required=False)
+
+    hardDisk_gigabytes = forms.ChoiceField(choices=HardDisk.GIGABYTES_TYPES, required=False)
+    hardDisk_types = forms.ChoiceField(choices=HardDisk.DISK_TYPES, required=False)
+
+    lanCard_type = forms.CharField()
+    lanCard_series = forms.CharField()
+
+    def __init__(self, *args, **kwargs):
+        # Извлечение дополнительных аргументов из kwargs
+        self.processor_queryset = kwargs.pop('processor_queryset', None)
+        self.videoCard_queryset = kwargs.pop('videoCard_queryset', None)
+        self.lanCard_queryset = kwargs.pop('lanCard_queryset', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        processor_name = cleaned_data.get('processor_name')
+        videoCard_name = cleaned_data.get('videoCard_name')
+
+        ram_gigabytes = cleaned_data.get('ram_gigabytes')
+        ram_types = cleaned_data.get('ram_types')
+
+        hardDisk_gigabytes = cleaned_data.get('hardDisk_gigabytes')
+        hardDisk_types = cleaned_data.get('hardDisk_types')
+
+        
+
+        lanCard_type = cleaned_data.get('lanCard_type')
+        lanCard_series = cleaned_data.get('lanCard_series')
+
+        if not processor_name:
+            raise forms.ValidationError('Processor must be filled')
+        if not videoCard_name:
+            raise forms.ValidationError('Video card must be filled')
+
+        
+        return cleaned_data

@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Computer, Order_Computer, Customer, Location, UserName, Employee, Processor, VideoCard, LANcard, RAM, HardDisk, Windows, TypeDB, Monitor, DiskPlace, AdditionalSettings
 from django.db.models import Q
 import json
-from .forms import ComputerForm, FirstForm, MainInformationForm
+from .forms import ComputerForm, FirstForm, MainInformationForm, ComputerHardwareForm
 
 from datetime import datetime
 from django.utils import timezone
@@ -816,51 +816,99 @@ def search_orders(request):
 
 
 class ComputerWizard(SessionWizardView):
-   
-
-    
-    form_list = [FirstForm, MainInformationForm]
+    form_list = [FirstForm, MainInformationForm, ComputerHardwareForm]
     template_name = 'home/computer_wizard_form.html'
-    
+
     def get_form_kwargs(self, step=None):
         kwargs = super().get_form_kwargs(step)
-        if step == '0':  # assuming FirstForm is the first form
+        if step == '0':
             kwargs['customer_queryset'] = Customer.objects.all()
+        if step == '2':
+            kwargs['processor_queryset'] = Processor.objects.all()
+            kwargs['videoCard_queryset'] = VideoCard.objects.all()
+        
         return kwargs
-    
+
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form=form, **kwargs)
-        if self.steps.current == '0':  # assuming FirstForm is the first form
+        if self.steps.current == '0':
             context['customer_queryset'] = Customer.objects.all()
-        elif self.steps.current == '1':  # assuming MainInformationForm is the second form
-            context['users'] = UserName.objects.all()  # или другой источник данных для пользователей
+        if self.steps.current == '1':
+            user_types = UserName.objects.values_list('user_type', flat=True).distinct()
+            context['user_types'] = user_types
+            context['users'] = UserName.objects.all()
+        if self.steps.current == '2':
+            context['processor_queryset'] = Processor.objects.all()
+            context['videoCard_queryset'] = VideoCard.objects.all()
+            context['lanCard_queryset'] = LANcard.objects.all()
         return context
-    
+
     def done(self, form_list, **kwargs):
-        
-        # Обработка данных после завершения визарда
         data = self.get_all_cleaned_data()
+
+        # Создаем объекты на основе данных из форм
+        customer = Customer.objects.create(name=data.get('customer_name'))
+        location = Location.objects.create(name=data.get('location_name'))
         computer = Computer.objects.create(
-            type=data.get('type', ''),
-            
+            name=data.get('computer_name'),
+            serial_number=data.get('computer_series'),
+            type=data.get('computer_type'),
+            custom_type=data.get('custom_computer_type'),
+            addComment=data.get('computer_comment')
         )
-        customer = Customer.objects.create(name=data.get('name', ''))
-        location = Location.objects.create(name=data.get('location_name', ''))
 
-        for user_data in zip(data.getlist('user_name'), data.getlist('user_password')):
-            user = UserName.objects.create(
-                user_type=data.get('user_type'),
-                user_name=user_data[0],
-                user_password=user_data[1]
-            )
-            computer.user.add(user)
 
-        # Установите связи между объектами, если необходимо
+        processor_name = data.get('processor_name')
+        if processor_name:
+            processor, _ = Processor.objects.get_or_create(name=processor_name)
+            computer.processor = processor
+
+        # Пример для сохранения видеокарты
+        videoCard_name = data.get('videoCard_name')
+        if videoCard_name:
+            videoCard, _ = VideoCard.objects.get_or_create(name=videoCard_name)
+            computer.videoCard = videoCard
+
+        lanCard_type = data.get('lanCard_type')
+        lanCard_series = data.get('lanCard_series')
+        if lanCard_type:
+            lanCard, _ = LANcard.objects.get_or_create(type=lanCard_type)
+            computer.lanCard = lanCard
+        elif lanCard_series:
+            lanCard, _ = LANcard.objects.get_or_create(series=lanCard_series)
+            computer.lanCard = lanCard
+
+            
+        for ram in RAM.objects.all():
+            ram_gigabytes = data.get('ram_gigabytes'),
+            ram_type = data.get('ram_type')
+            if ram_gigabytes and ram_type:
+                new_ram = RAM.objects.create(
+                    gigabytes=ram_gigabytes,
+                    type=ram_type
+                )
+                computer.ram.add(new_ram)
+
+
         computer.customer = customer
         computer.locations.add(location)
-      
+
+        for user in UserName.objects.all():
+            user_type = data.get(f'user_type_{user.pk}')
+            user_name = data.get(f'user_name_{user.pk}')
+            user_password = data.get(f'user_password_{user.pk}')
+            if user_type and user_name and user_password:
+                new_user = UserName.objects.create(
+                    user_type=user_type,
+                    login=user_name,
+                    password=user_password
+                )
+                computer.user.add(new_user)
+       
+
         computer.save()
 
         return HttpResponseRedirect('/success/')
+
 
 

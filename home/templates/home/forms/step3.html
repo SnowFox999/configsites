@@ -1,0 +1,137 @@
+
+
+
+<div class="row">               
+    <div class="col-sm-4">
+      <div class="row-sm-4">
+        <div class="form-group track-changes">
+          <label>Processor</label>
+          <input list="processorList" id="processorsInput" name="Processor" class="form-control" 
+           placeholder="Processor" 
+          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+            <datalist id="processorList">
+                {% for processor in processor_queryset %}
+                    <option value="{{ processor.name }}">
+                {% endfor %}       
+            </datalist>
+
+         </div>
+      </div>
+      <div class="row-sm-4">                    
+        <div class="form-group track-changes">
+            <label>LAN card</label>
+
+            <input list="lanCardList" id="lanCardsInput" name="lanCard_type" class="form-control" 
+                placeholder="LAN card" 
+                style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+            <datalist id="lanCardList">
+              {% for lanCard in lanCard_queryset %}
+                <option value="{{ lanCard.type }}">
+              {% endfor %}       
+            </datalist>     
+        </div>
+      </div>                   
+    </div>
+    
+
+    <div class="col-sm-4">
+      <div class="row-sm-4">
+        <div class="form-group track-changes">
+          
+
+          <label>Video card</label>
+
+          <input list="videoCardList" id="videoCardsInput" name="videoCard" class="form-control" 
+           placeholder="Video card" 
+          style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+            <datalist id="videoCardList">
+                {% for videoCard in videoCard_queryset %}
+                    <option value="{{ videoCard.name }}">
+                {% endfor %}       
+            </datalist>  
+          
+      </div>
+      
+      </div>
+      <div class="row-sm-4">
+        <div class="form-group track-changes">
+          <label>LAN card series</label>
+          <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter LAN card series"
+                    name="{{ wizard.form.lanCard_series.series }}"
+                    
+                    id="{{ wizard.form.lanCard_series.id_for_label }}"
+                >
+          
+          
+          </div>
+      </div>
+    </div>
+
+
+    <div class="col-sm-4">
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="form-group track-changes">
+            <label>RAM GB</label>
+            <select class="form-control select" name="ram_gigabytes"  style="width: 100%;">   
+              {% for choice in ram_gigabytes %}                
+              <option value="{{ choice }}">{{ form.ram_gigabytes.value }}</option>   
+              {% endfor %}               
+            </select> 
+
+            
+            
+          </div>
+        </div>
+        <div class="col-sm-9">
+          <div class="form-group track-changes">
+            <label>RAM type</label>
+
+            <input list="ramList" id="ramsInput" name="ram_type" class="form-control" 
+              value="{{ form.ram_type.value }}" placeholder="RAM type" 
+              style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+          <datalist id="ramList">
+            {% for choice in ram_types %}
+              <option value="{{ choice }}">
+            {% endfor %}       
+          </datalist>
+
+
+            
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="form-group track-changes">
+            <label>Disk GB</label>
+            <select class="form-control select" name="disk_gigabytes" style="width: 100%;">
+              {% for choice in hardDisk_gigabytes %}
+                <option value="{{ choice }}">{{ form.hardDisk_gigabytes.value }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="col-sm-9">
+          <div class="form-group track-changes">
+            <label>Hard disk type</label>
+
+            <input list="hardDiskList" id="hardDisksInput" name="disk_type" class="form-control" 
+              value="{{ form.hardDisk_type.value }}" placeholder="Hard disk type" 
+              style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+          <datalist id="hardDiskList">
+            {% for choice in hardDisk_types %}
+              <option value="{{ choice }}">
+            {% endfor %}       
+          </datalist>
+
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

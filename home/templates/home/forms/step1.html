@@ -33,7 +33,7 @@
            >
     <datalist id="computerTypeList">
         {% for choice in wizard.form.fields.computer_type.choices %}
-            <option value="{{ choice }}">{{ choice }}</option>
+            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
         {% endfor %}
     </datalist>
 </div>
