@@ -826,11 +826,13 @@ class ComputerWizard(SessionWizardView):
         if step == '2':
             kwargs['processor_queryset'] = Processor.objects.all()
             kwargs['videoCard_queryset'] = VideoCard.objects.all()
+            kwargs['lanCard_queryset'] = LANcard.objects.all()
         
         return kwargs
 
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form=form, **kwargs)
+        context['segment'] = 'computer_wizard'
         if self.steps.current == '0':
             context['customer_queryset'] = Customer.objects.all()
         if self.steps.current == '1':
@@ -841,74 +843,87 @@ class ComputerWizard(SessionWizardView):
             context['processor_queryset'] = Processor.objects.all()
             context['videoCard_queryset'] = VideoCard.objects.all()
             context['lanCard_queryset'] = LANcard.objects.all()
+
+            context['ram_gigabytes'] = RAM.GIGABYTES_TYPES
+            context['ram_types'] = RAM.RAM_TYPES
+
+            context['hardDisk_gigabytes'] = HardDisk.GIGABYTES_TYPES
+            context['hardDisk_types'] = HardDisk.DISK_TYPES
         return context
 
     def done(self, form_list, **kwargs):
         data = self.get_all_cleaned_data()
+        print(data)
+        
 
         # Создаем объекты на основе данных из форм
-        customer = Customer.objects.create(name=data.get('customer_name'))
-        location = Location.objects.create(name=data.get('location_name'))
+        customer, _ = Customer.objects.get_or_create(name=data.get('customer_name'))
+
+        location, _ = Location.objects.get_or_create(name=data.get('location_name'))
         computer = Computer.objects.create(
             name=data.get('computer_name'),
             serial_number=data.get('computer_series'),
             type=data.get('computer_type'),
             custom_type=data.get('custom_computer_type'),
-            addComment=data.get('computer_comment')
+            addComment=data.get('computer_comment'),
+            customer=customer
         )
+        computer.save()
+        computer.locations.add(location)
 
 
         processor_name = data.get('processor_name')
         if processor_name:
             processor, _ = Processor.objects.get_or_create(name=processor_name)
-            computer.processor = processor
+            computer.processor.add(processor)
 
         # Пример для сохранения видеокарты
         videoCard_name = data.get('videoCard_name')
         if videoCard_name:
             videoCard, _ = VideoCard.objects.get_or_create(name=videoCard_name)
-            computer.videoCard = videoCard
+            computer.videoCard.add(videoCard)
 
         lanCard_type = data.get('lanCard_type')
         lanCard_series = data.get('lanCard_series')
-        if lanCard_type:
-            lanCard, _ = LANcard.objects.get_or_create(type=lanCard_type)
-            computer.lanCard = lanCard
-        elif lanCard_series:
-            lanCard, _ = LANcard.objects.get_or_create(series=lanCard_series)
-            computer.lanCard = lanCard
+        if lanCard_type or lanCard_series:
+            lanCard, _ = LANcard.objects.get_or_create(
+                type=lanCard_type or '',
+                series=lanCard_series or ''
+            )
+            computer.lanCard.add(lanCard)
 
             
-        for ram in RAM.objects.all():
-            ram_gigabytes = data.get('ram_gigabytes'),
-            ram_type = data.get('ram_type')
-            if ram_gigabytes and ram_type:
-                new_ram = RAM.objects.create(
-                    gigabytes=ram_gigabytes,
-                    type=ram_type
-                )
-                computer.ram.add(new_ram)
+        ram_gigabytes = data.get('ram_gigabytes')
+        ram_type = data.get('ram_types')
+        if ram_gigabytes and ram_type:
+            new_ram = RAM.objects.create(gigabytes=ram_gigabytes, type=ram_type)
+            computer.ram.add(new_ram)
 
 
-        computer.customer = customer
-        computer.locations.add(location)
+        hardDisk_gigabytes = data.get('hardDisk_gigabytes')
+        hardDisk_type = data.get('disk_type')
+        if hardDisk_gigabytes and hardDisk_type:
+            new_hardDisk = HardDisk.objects.create(gigabytes=hardDisk_gigabytes, type=hardDisk_type)
+            computer.hardDisk.add(new_hardDisk)
 
-        for user in UserName.objects.all():
-            user_type = data.get(f'user_type_{user.pk}')
-            user_name = data.get(f'user_name_{user.pk}')
-            user_password = data.get(f'user_password_{user.pk}')
-            if user_type and user_name and user_password:
-                new_user = UserName.objects.create(
-                    user_type=user_type,
-                    login=user_name,
-                    password=user_password
-                )
-                computer.user.add(new_user)
+        
+
+        
+        user_type = data.get('user_type')
+        user_name = data.get('user_name')
+        user_password = data.get('user_password')
+        if user_type and user_name and user_password:
+            new_user = UserName.objects.create(
+                user_type=user_type,
+                login=user_name,
+                password=user_password
+            )
+            computer.user.add(new_user)
        
 
-        computer.save()
+        
 
-        return HttpResponseRedirect('/success/')
+        return HttpResponseRedirect('/orders/')
 
 
 

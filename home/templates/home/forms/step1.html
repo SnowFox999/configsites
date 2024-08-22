@@ -1,8 +1,10 @@
 <!-- templates/forms/first_form.html -->
 <div class="form-group">
     <div class="form-group track-changes">
-        <label>Customer name</label>
-        <input list="customerList" id="customerInput" name="customer_name" class="form-control"  placeholder="Select or enter customer name" style="width: 100%">
+        <label for="{{ wizard.form.customer_name.id_for_label }}" class="form-label">
+            {{ wizard.form.customer_name.label_tag }}
+        </label>
+        <input list="customerList" id="{{ wizard.form.customer_name.id_for_label }}" name="{{ wizard.form.customer_name.name }}" class="form-control"  placeholder="Select or enter customer name" style="width: 100%">
         <datalist id="customerList">
             {% for customer in customer_queryset %}
             <option value="{{ customer.name }}">
@@ -27,8 +29,10 @@
 
 
 <div class="form-group">
-    <label for="computerTypeInput">Computer Type</label>
-    <input list="computerTypeList" id="computerTypeInput" name="computer_type" class="form-control"
+    <label for="{{ wizard.form.computer_type.id_for_label }}" class="form-label">
+        {{ wizard.form.computer_type.label_tag }}
+    </label>
+    <input list="computerTypeList" id="{{ wizard.form.computer_type.id_for_label }}" name="{{ wizard.form.computer_type.name }}" class="form-control"
            placeholder="Select or enter computer type"
            >
     <datalist id="computerTypeList">
@@ -37,6 +41,4 @@
         {% endfor %}
     </datalist>
 </div>
-
-
 

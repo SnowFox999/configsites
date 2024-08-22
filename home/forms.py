@@ -168,59 +168,32 @@ class FirstForm(forms.Form):
     custom_computer_type = forms.CharField(
         label="Custom Computer Type",
         required=False
-    )
+    )  
 
     def __init__(self, *args, **kwargs):
-        # Получаем queryset, если он передан
+        # Извлечение дополнительных аргументов из kwargs
         self.customer_queryset = kwargs.pop('customer_queryset', None)
         super().__init__(*args, **kwargs)
-        
-        # Используем queryset для создания выбора в поле
-        if self.customer_queryset:
-            self.fields['customer_name'].widget = forms.TextInput(
-                attrs={
-                    'list': 'customerList',
-                    'placeholder': 'Customer name',
-                    'class': 'form-control',
-                    'style': 'width: 100%'
-                }
-            )
-   
-    
+
+
     def clean(self):
         cleaned_data = super().clean()
         computer_type = cleaned_data.get('computer_type')
         custom_computer_type = cleaned_data.get('custom_computer_type')
+        customer_name = self.cleaned_data.get('customer_name')
 
         # Проверяем, чтобы был выбран либо существующий тип, либо введен кастомный тип
         if not computer_type and not custom_computer_type:
-            raise forms.ValidationError("Choose type")
-
-        return cleaned_data
-    
-    def clean_customer_name(self):
-        customer_name = self.cleaned_data.get('customer_name')
+            raise forms.ValidationError("You must choose an existing type or provide a custom type.")
         if not customer_name:
             raise forms.ValidationError("Customer name cannot be empty.")
-        return customer_name
 
-    def save(self):
-        cleaned_data = self.cleaned_data
-        # Создание объектов и сохранение данных
-        customer_name = cleaned_data['customer_name']
-        location = Location.objects.create(name=self.cleaned_data['location_name'])
-        computer_type = cleaned_data['custom_computer_type'] or self.cleaned_data['computer_type']
-        computer = Computer.objects.create(
-            type=cleaned_data['computer_type'] if not self.cleaned_data['custom_computer_type'] else None,  # Используем существующий тип
-            custom_type=computer_type  # Используем кастомный тип
-        )
+        return cleaned_data
 
-        customer, created = Customer.objects.get_or_create(name=customer_name)
+    
 
-        # Установка связей между моделями
-        computer.customer = customer
-        computer.locations.add(location)
-        computer.save()
+     
+       
 
 
 
