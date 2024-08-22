@@ -165,10 +165,7 @@ class FirstForm(forms.Form):
     # Поля из Computer модели
     computer_type = forms.ChoiceField(choices=Computer.TYPE_CHOICES, required=False)
 
-    custom_computer_type = forms.CharField(
-        label="Custom Computer Type",
-        required=False
-    )  
+    
 
     def __init__(self, *args, **kwargs):
         # Извлечение дополнительных аргументов из kwargs
@@ -178,22 +175,21 @@ class FirstForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        computer_type = cleaned_data.get('computer_type')
-        custom_computer_type = cleaned_data.get('custom_computer_type')
-        customer_name = self.cleaned_data.get('customer_name')
+        print(f"Cleaned data on step 1: {cleaned_data}")
 
-        # Проверяем, чтобы был выбран либо существующий тип, либо введен кастомный тип
-        if not computer_type and not custom_computer_type:
-            raise forms.ValidationError("You must choose an existing type or provide a custom type.")
+        computer_type = cleaned_data.get('computer_type')
+        
+        customer_name = cleaned_data.get('customer_name')
+        location_name = cleaned_data.get('location_name')
+
+        if not computer_type:
+            raise forms.ValidationError("You must choose an existing type")
         if not customer_name:
             raise forms.ValidationError("Customer name cannot be empty.")
+        if not location_name:
+            raise forms.ValidationError("Location name cannot be empty.")
 
         return cleaned_data
-
-    
-
-     
-       
 
 
 
@@ -210,6 +206,8 @@ class MainInformationForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
+        print(f"Cleaned data on step 2: {cleaned_data}")
+
         user_name = cleaned_data.get('user_name')
         user_password = cleaned_data.get('user_password')
         user_type = cleaned_data.get('user_type')
@@ -256,7 +254,8 @@ class ComputerHardwareForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        
+        print(f"Cleaned data on step 3: {cleaned_data}")
+
         processor_name = cleaned_data.get('processor_name')
         videoCard_name = cleaned_data.get('videoCard_name')
 

@@ -8,7 +8,7 @@
           <label for="{{ wizard.form.processor_name.id_for_label }}" class="form-label">
             {{ wizard.form.processor_name.label_tag }}
         </label>                
-        <input list="processorList" id="{{ wizard.form.processor_name.id_for_label }}" name="{{ wizard.form.processor_name.name }}" class="form-control" placeholder="Processor" style="width: 100%">
+        <input list="processorList" id="{{ wizard.form.processor_name.id_for_label }}" name="{{ wizard.form.processor_name.html_name }}" class="form-control" placeholder="Processor" style="width: 100%">
         <datalist id="processorList">
             {% for processor in processor_queryset %}
             <option value="{{ processor.name }}">
@@ -22,7 +22,7 @@
           <label for="{{ wizard.form.lanCard_type.id_for_label }}" class="form-label">
             {{ wizard.form.lanCard_type.label_tag }}
           </label>  
-            <input list="lanCardList" id="{{ wizard.form.lanCard_type.id_for_label }}" name="{{ wizard.form.lanCard_type.name }}" class="form-control" 
+            <input list="lanCardList" id="{{ wizard.form.lanCard_type.id_for_label }}" name="{{ wizard.form.lanCard_type.html_name }}" class="form-control" 
                 placeholder="LAN card" 
                 style="width: 100%" onkeypress="handleKeyPress(event)">
             <datalist id="lanCardList">
@@ -42,7 +42,7 @@
             {{ wizard.form.videoCard_name.label_tag }}
           </label> 
 
-          <input list="videoCardList" id="{{ wizard.form.videoCard_name.id_for_label }}" name="{{ wizard.form.videoCard_name.name }}" class="form-control" placeholder="Video card" style="width: 100%" onkeypress="handleKeyPress(event)">
+          <input list="videoCardList" id="{{ wizard.form.videoCard_name.id_for_label }}" name="{{ wizard.form.videoCard_name.html_name }}" class="form-control" placeholder="Video card" style="width: 100%" onkeypress="handleKeyPress(event)">
             <datalist id="videoCardList">
                 {% for videoCard in videoCard_queryset %}
                     <option value="{{ videoCard.name }}">
@@ -63,7 +63,7 @@
                     class="form-control"
                     placeholder="Enter LAN card series"
                     id="{{ wizard.form.lanCard_series.id_for_label }}"
-                    name="{{ wizard.form.lanCard_series.name }}"                                    
+                    name="{{ wizard.form.lanCard_series.html_name }}"                                    
                 >         
           </div>
       </div>
@@ -75,7 +75,7 @@
         <div class="col-sm-3">
           <div class="form-group track-changes">
             <label>RAM GB</label>
-            <select class="form-control select" id="{{ wizard.form.ram_gigabytes.id_for_label }}" name="{{ wizard.form.ram_gigabytes.name }}"  style="width: 100%;">   
+            <select class="form-control select" id="{{ wizard.form.ram_gigabytes.id_for_label }}" name="{{ wizard.form.ram_gigabytes.html_name }}"  style="width: 100%;">   
                 {% for choice, label in ram_gigabytes %}                
                 <option value="{{ choice }}" {% if wizard.form.ram_gigabytes.value == choice %}selected{% endif %}>
                     {{ label }}
@@ -93,7 +93,7 @@
               {{ wizard.form.ram_types.label_tag }}
             </label>
 
-            <input list="ramList" id="{{ wizard.form.ram_types.id_for_label }}" name="{{ wizard.form.ram_types.name }}" class="form-control" 
+            <input list="ramList" id="{{ wizard.form.ram_types.id_for_label }}" name="{{ wizard.form.ram_types.html_name }}" class="form-control" 
             placeholder="RAM type" style="width: 100%">
             <datalist id="ramList">
                 {% for choice, label in ram_types %}
@@ -110,7 +110,7 @@
         <div class="col-sm-3">
           <div class="form-group track-changes">
             <label>Disk GB</label>
-            <select class="form-control select" id="{{ wizard.form.hardDisk_gigabytes.id_for_label }}" name="{{ wizard.form.hardDisk_gigabytes.name }}" style="width: 100%;">
+            <select class="form-control select" id="{{ wizard.form.hardDisk_gigabytes.id_for_label }}" name="{{ wizard.form.hardDisk_gigabytes.html_name }}" style="width: 100%;">
               {% for choice, label in hardDisk_gigabytes %}
                 <option value="{{ choice }}"{% if wizard.form.hardDisk_gigabytes.value == choice %}selected{% endif %}>
                     {{ label }}
@@ -125,7 +125,7 @@
               {{ wizard.form.hardDisk_types.label_tag }}
             </label>
 
-            <input list="hardDiskList" id="{{ wizard.form.hardDisk_types.id_for_label }}" name="{{ wizard.form.hardDisk_types.name }}" class="form-control" 
+            <input list="hardDiskList" id="{{ wizard.form.hardDisk_types.id_for_label }}" name="{{ wizard.form.hardDisk_types.html_name }}" class="form-control" 
               placeholder="Hard disk type" 
               style="width: 100%" onkeypress="handleKeyPress(event)">
           <datalist id="hardDiskList">

@@ -111,7 +111,7 @@
                     type="text"
                     class="form-control"
                     placeholder="Enter computer name"
-                    name="{{ wizard.form.computer_name.name }}"
+                    name="{{ wizard.form.computer_name.html_name}}"
                     
                     id="{{ wizard.form.computer_name.id_for_label }}"
                 >
@@ -127,7 +127,7 @@
                     type="text"
                     class="form-control"
                     placeholder="Enter computer serial number"
-                    name="{{ wizard.form.computer_series.name }}"
+                    name="{{ wizard.form.computer_series.html_name }}"
                     
                     id="{{ wizard.form.computer_series.id_for_label }}"
                 >
@@ -143,7 +143,7 @@
                 <label for="{{ wizard.form.user_type.id_for_label }}" class="form-label">
                     {{ wizard.form.user_type.label_tag }}
                 </label>                
-                <input list="userList_{{ user.pk }}" id="{{ wizard.form.user_type.id_for_label }}" name="{{ wizard.form.user_type.name }}" class="form-control" placeholder="User type" style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
+                <input list="userList_{{ user.pk }}" id="{{ wizard.form.user_type.id_for_label }}" name="{{ wizard.form.user_type.html_name }}" class="form-control" placeholder="User type" style="width: 100%" onblur="addNew()" onkeypress="handleKeyPress(event)">
                 <datalist id="userList_{{ user.pk }}">
                     {% for choice in wizard.form.fields.user_type.choices %}
                     <option value="{{ choice.1 }}">
@@ -160,7 +160,7 @@
                     type="text"
                     class="form-control"
                     placeholder="Enter computer serial number"
-                    name="{{ wizard.form.user_name.name }}"
+                    name="{{ wizard.form.user_name.html_name }}"
                     
                     id="{{ wizard.form.user_name.id_for_label }}"
                 >
@@ -177,7 +177,7 @@
                             type="text"
                             class="form-control"
                             placeholder="Enter computer serial number"
-                            name="{{ wizard.form.user_password.name }}"
+                            name="{{ wizard.form.user_password.html_name }}"
                             
                             id="{{ wizard.form.user_password.id_for_label }}"
                         >
@@ -203,7 +203,7 @@
         <textarea
             class="form-control"
             placeholder="Enter a comment"
-            name="{{ wizard.form.computer_comment.name }}"
+            name="{{ wizard.form.computer_comment.html_name }}"
             id="{{ wizard.form.computer_comment.id_for_label }}"
         ></textarea>
         
