@@ -917,12 +917,17 @@ class ComputerWizard(SessionWizardView):
 
             lanCard_type = data.get('lanCard_type')
             lanCard_series = data.get('lanCard_series')
-            if lanCard_type or lanCard_series:
-                lanCard, _ = LANcard.objects.get_or_create(
-                    type=lanCard_type or '',
-                    series=lanCard_series or ''
+            if lanCard_type and lanCard_series:
+                # Пробуем получить или создать LAN-карту, учитывая и тип, и серию
+                lanCard, created = LANcard.objects.get_or_create(
+                    type=lanCard_type,
+                    series=lanCard_series
                 )
-                computer.lanCard.add(lanCard)
+                
+                # Добавляем LAN-карту к компьютеру, если она еще не привязана
+                if not computer.lanCard.filter(type=lanCard_type, series=lanCard_series).exists():
+                    computer.lanCard.add(lanCard)
+
 
                 
             ram_gigabytes = data.get('ram_gigabytes')
