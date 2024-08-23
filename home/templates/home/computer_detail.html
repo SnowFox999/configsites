@@ -64,7 +64,7 @@
           </div>
           
               <div style="margin-right: 10px;"></div>
-              <div class="ml-auto"> <!-- Кнопка "Edit" выравнивается справа -->
+              <div class="ml-auto"> 
                 <a href="{% url 'edit' computer_id=computer.id %}" class="btn btn-primary">Edit</a>
               </div>
 
@@ -500,77 +500,7 @@
 
             
 
-            <script>
-              $(document).ready(function() {              
-                $('#computer-form').on('submit', function(event) {
-                  event.preventDefault();
-                  var formData = $(this).serializeArray();
-                  var data = {};
-                  formData.forEach(function(item) {
-                    data[item.name] = item.value;
-                  });
-                  $.ajax({
-                    url: $(this).attr('action'),
-                    type: 'POST',
-                    data: JSON.stringify(data),
-                    contentType: 'application/json',
-                    headers: {
-                      'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    success: function(response) {
-                      alert(response.message);
-                    },
-                    error: function(response) {
-                      alert('An error occurred');
-                    }
-                  });
-                });
-
-                $(document).ready(function(){
-                  $(":input").inputmask();
-              });
-
-                // Инициализация Inputmask
-                $(":input").inputmask();
-              });
-
-              document.getElementById('addUserBtn').addEventListener('click', function() {
-                let container = document.getElementById('userContainer');
-                let userFields = `
-                  <div class="row">
-                    <div class="col-sm-6">
-                      <div class="form-group">
-                        <label>User type</label>
-                        <select class="form-control select2bs4" style="width: 100%;" name="user_type[]">
-                          {% for user_type, user_type_display in UserName.USER_TYPES %}
-                            <option value="{{ user_type }}">{{ user_type_display }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    </div>
-                    <div class="col-sm-6">
-                      <div class="form-group">
-                        <label>User name</label>
-                        <select class="form-control" name="user_name[]">
-                          {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.login }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row-sm-4">
-                    <div class="form-group">
-                      <label>User password</label>
-                      <input type="text" class="form-control" placeholder="Password" name="user_password[]">
-                    </div>
-                  </div>
-                `;
-                container.insertAdjacentHTML('beforeend', userFields);
-              });
-
-            </script>
-
+            
 
 
 

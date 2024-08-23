@@ -50,7 +50,7 @@ class ComputerForm(forms.ModelForm):
         self.fields['customer_name'].choices = [(customer.id, customer.name) for customer in customer_queryset]
         self.fields['employee_name'].choices = [(employee.id, employee.name) for employee in employee_queryset]
 
-        # Установка начальных значений для полей
+        # Initial values
         self._set_initial_values()
 
        
@@ -136,7 +136,7 @@ class ComputerForm(forms.ModelForm):
         computer_type = cleaned_data.get('computer_type')
 
 
-        # Логика обработки полей `type` и `custom_type`
+        
         if computer_type:
             existing_types = [choice[0] for choice in Computer.objects.values_list('type', flat=True)]
             if computer_type not in existing_types:
@@ -159,16 +159,15 @@ class ComputerForm(forms.ModelForm):
 class FirstForm(forms.Form):
     customer_name = forms.CharField()
 
-    # Поля из Location модели
+
     location_name = forms.CharField()
 
-    # Поля из Computer модели
     computer_type = forms.ChoiceField(choices=Computer.TYPE_CHOICES, required=False)
 
     
 
     def __init__(self, *args, **kwargs):
-        # Извлечение дополнительных аргументов из kwargs
+   
         self.customer_queryset = kwargs.pop('customer_queryset', None)
         super().__init__(*args, **kwargs)
 
@@ -223,7 +222,7 @@ class MainInformationForm(forms.Form):
             raise forms.ValidationError('Computer series must be filled')
 
 
-        # Проверка, что имя пользователя и пароль заполнены
+
         if not user_name or not user_password or not user_type:
             raise forms.ValidationError("User name and password must be provided.")
   
@@ -246,7 +245,7 @@ class ComputerHardwareForm(forms.Form):
     lanCard_series = forms.CharField()
 
     def __init__(self, *args, **kwargs):
-        # Извлечение дополнительных аргументов из kwargs
+       
         self.processor_queryset = kwargs.pop('processor_queryset', None)
         self.videoCard_queryset = kwargs.pop('videoCard_queryset', None)
         self.lanCard_queryset = kwargs.pop('lanCard_queryset', None)

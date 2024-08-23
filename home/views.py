@@ -96,7 +96,7 @@ def computer_edit(request, computer_id):
         if form.is_valid():
             form.save()
 
-            # Обработка POST-запроса для сохранения изменений
+          
             computer.name = request.POST.get('name')
             computer.status = request.POST.get('status')
             computer.serial_number = request.POST.get('serial_number')
@@ -119,14 +119,6 @@ def computer_edit(request, computer_id):
         
             
 
-            
-        
-
-            # Для связанных объектов обработка может быть сложнее, в зависимости от того, как у вас настроены модели.
-            # Вы должны убедиться, что связанные объекты существуют или создать их.
-            
-            # Пример:
-            # Если ваши связанные поля являются ForeignKey или ManyToManyField, нужно обрабатывать их отдельно.
             customer = request.POST.get('customer')
             if customer:
                 computer.customer = get_object_or_404(Customer, pk=customer)
@@ -370,7 +362,7 @@ def edit(request, computer_id):
                 user.save()
 
             computer.save()
-            form.save_m2m()  # Сохранение ManyToMany полей
+            form.save_m2m()  # many to many
             return JsonResponse({'message': 'Success'})
         else:
             return JsonResponse({'error': form.errors}, status=400)
@@ -805,9 +797,9 @@ def search_orders(request):
         orders = orders.filter(
             Q(computer__name__icontains=query) |
             Q(computer__customer__name__icontains=query) |
-            Q(computer__date__icontains=query) |  # Здесь нужно указать поле даты в модели Computer
-            Q(computer__status__icontains=query) |  # Здесь нужно указать поле статуса в модели Computer
-            Q(id__icontains=query)  # Поиск по айди заказа
+            Q(computer__date__icontains=query) |  
+            Q(computer__status__icontains=query) |  
+            Q(id__icontains=query)  
         )
     return render(request, 'home/order_list_results.html', {'orders': orders})
 
@@ -882,7 +874,7 @@ class ComputerWizard(SessionWizardView):
             print(f"Cleaned data: {data}")
             
 
-            # Создаем объекты на основе данных из форм
+          
             customer, _ = Customer.objects.get_or_create(name=data.get('customer_name'))
 
             
@@ -897,7 +889,7 @@ class ComputerWizard(SessionWizardView):
             )
             location, _ = Location.objects.get_or_create(
             name=data.get('location_name'),
-            computer=computer  # Связываем с созданным Computer
+            computer=computer  
         )
             
             
@@ -909,7 +901,7 @@ class ComputerWizard(SessionWizardView):
                 processor, _ = Processor.objects.get_or_create(name=processor_name)
                 computer.processor.add(processor)
 
-            # Пример для сохранения видеокарты
+           
             videoCard_name = data.get('videoCard_name')
             if videoCard_name:
                 videoCard, _ = VideoCard.objects.get_or_create(name=videoCard_name)
@@ -918,13 +910,12 @@ class ComputerWizard(SessionWizardView):
             lanCard_type = data.get('lanCard_type')
             lanCard_series = data.get('lanCard_series')
             if lanCard_type and lanCard_series:
-                # Пробуем получить или создать LAN-карту, учитывая и тип, и серию
+              
                 lanCard, created = LANcard.objects.get_or_create(
                     type=lanCard_type,
                     series=lanCard_series
                 )
-                
-                # Добавляем LAN-карту к компьютеру, если она еще не привязана
+               
                 if not computer.lanCard.filter(type=lanCard_type, series=lanCard_series).exists():
                     computer.lanCard.add(lanCard)
 
@@ -961,12 +952,12 @@ class ComputerWizard(SessionWizardView):
         
             computer.save()
 
-            print("Data saved successfully!")  # Для отладки
+            print("Data saved successfully!")  
 
             return HttpResponseRedirect('/orders/')
         
         except Exception as e:
-            print("Error during saving:", e)  # Для отладки
+            print("Error during saving:", e)  
             raise e
 
     
