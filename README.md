@@ -53,5 +53,6 @@ At this point, the app runs at `http://127.0.0.1:8000/`.
 
 <br />
 
-> All fields with foreign keys must be filled during creation of new computer (Customer, Employee, Windows) 
+> All fields with foreign keys must be filled during creation of new computer (Customer, Employee, Windows)
+<br />
 > Date must be filled
