@@ -174,7 +174,6 @@ class FirstForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        print(f"Cleaned data on step 1: {cleaned_data}")
 
         computer_type = cleaned_data.get('computer_type')
         
@@ -205,7 +204,6 @@ class MainInformationForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        print(f"Cleaned data on step 2: {cleaned_data}")
 
         user_name = cleaned_data.get('user_name')
         user_password = cleaned_data.get('user_password')
@@ -253,7 +251,6 @@ class ComputerHardwareForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        print(f"Cleaned data on step 3: {cleaned_data}")
 
         processor_name = cleaned_data.get('processor_name')
         videoCard_name = cleaned_data.get('videoCard_name')
@@ -263,9 +260,7 @@ class ComputerHardwareForm(forms.Form):
 
         hardDisk_gigabytes = cleaned_data.get('hardDisk_gigabytes')
         hardDisk_types = cleaned_data.get('hardDisk_types')
-
-        
-
+       
         lanCard_type = cleaned_data.get('lanCard_type')
         lanCard_series = cleaned_data.get('lanCard_series')
 
