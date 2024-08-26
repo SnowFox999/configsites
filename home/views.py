@@ -107,10 +107,7 @@ def computer_edit(request, computer_id):
             computer.hardDisk = request.POST.get('hardDisk')
             computer.diskPlace = request.POST.get('diskPlace')
             
-            
-            
-            
-            
+    
             
             computer.addDevices = request.POST.get('addDevices')
             computer.addComment = request.POST.get('addComment')
